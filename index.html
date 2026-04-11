@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Marelli — AI Meeting Annotator</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --p295:#002855;--p2925:#009CDE;--grey:#A6BBC8;
+  --light:#f4f7fa;--white:#fff;--border:#dde3ea;
+  --text:#002855;--text2:#3d5a72;--text3:#8fa3b3;
+  --urgent:#cc2233;--normal:#886600;--radius:6px;--t:all .15s ease;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--light);color:var(--text);font-family:'Noto Sans',Arial,sans-serif;font-size:13px;min-height:100vh;}
+
+/* ── HEADER ── */
+.header{background:var(--p295);height:54px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:8px;}
+.hbrand{display:flex;flex-direction:column;flex-shrink:0;}
+.hname{color:#fff;font-weight:700;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;}
+.hsub{color:var(--grey);font-size:10px;font-weight:300;}
+.haccent{width:3px;height:28px;background:var(--p2925);border-radius:2px;margin:0 12px;flex-shrink:0;}
+.hmid{color:var(--grey);font-size:11px;font-weight:300;display:none;}
+@media(min-width:600px){.hmid{display:block;}}
+.hright{display:flex;gap:6px;align-items:center;}
+.api-btn{font-family:'Noto Sans',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--grey);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:var(--radius);padding:6px 10px;cursor:pointer;transition:var(--t);white-space:nowrap;}
+.api-btn:hover{background:rgba(255,255,255,.15);color:#fff;}
+.api-btn.on{color:#4dd;border-color:rgba(0,229,200,.3);}
+.pending-btn{font-family:'Noto Sans',Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#fff;background:var(--p2925);border:none;border-radius:var(--radius);padding:6px 10px;cursor:pointer;transition:var(--t);display:flex;align-items:center;gap:5px;white-space:nowrap;}
+.pending-btn:hover{opacity:.85;}
+.pending-count{background:#fff;color:var(--p295);border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700;}
+
+/* ── LAYOUT ── */
+.layout{display:grid;grid-template-columns:1fr;height:calc(100vh - 54px);}
+@media(min-width:768px){.layout{grid-template-columns:240px 1fr;}}
+
+/* ── SIDEBAR ── */
+.sidebar{background:var(--white);border-right:1px solid var(--border);overflow-y:auto;padding:16px 0;display:none;}
+@media(min-width:768px){.sidebar{display:block;}}
+.sb-label{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;padding:0 14px;margin-bottom:4px;}
+.sb-section{margin-bottom:20px;}
+.tpl{width:100%;text-align:left;background:transparent;border:none;border-left:3px solid transparent;padding:8px 14px;cursor:pointer;transition:var(--t);display:flex;gap:8px;align-items:flex-start;font-family:'Noto Sans',Arial,sans-serif;}
+.tpl:hover{background:var(--light);border-left-color:var(--grey);}
+.tpl.active{background:rgba(0,156,222,.05);border-left-color:var(--p2925);}
+.tpl-ico{font-size:14px;flex-shrink:0;margin-top:1px;}
+.tpl-name{font-size:11px;font-weight:600;color:var(--text);margin-bottom:1px;}
+.tpl.active .tpl-name{color:var(--p295);}
+.tpl-desc{font-size:10px;color:var(--text3);line-height:1.3;font-weight:300;}
+.tpl-new{background:var(--p2925);color:#fff;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:1px 5px;border-radius:2px;margin-left:4px;vertical-align:middle;}
+.hist{padding:5px 14px;cursor:pointer;transition:var(--t);display:flex;gap:7px;align-items:center;}
+.hist:hover{background:var(--light);}
+.hist-name{font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;}
+.hist-date{font-size:9px;color:var(--text3);font-weight:300;}
+
+/* mobile template selector */
+.mobile-tpl-bar{background:var(--white);border-bottom:1px solid var(--border);padding:8px 12px;overflow-x:auto;display:flex;gap:6px;-webkit-overflow-scrolling:touch;}
+@media(min-width:768px){.mobile-tpl-bar{display:none;}}
+.mob-tpl{flex-shrink:0;background:var(--light);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:600;color:var(--text2);cursor:pointer;white-space:nowrap;font-family:'Noto Sans',Arial,sans-serif;}
+.mob-tpl.active{background:var(--p295);color:#fff;border-color:var(--p295);}
+
+/* ── WORKSPACE ── */
+.workspace{display:flex;flex-direction:column;overflow:hidden;}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:12px 16px;}
+.topbar-row1{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+.cur-icon{font-size:16px;}
+.cur-name{font-size:14px;font-weight:700;color:var(--p295);}
+.cur-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--p2925);background:rgba(0,156,222,.08);border:1px solid rgba(0,156,222,.2);border-radius:3px;padding:2px 7px;}
+.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+@media(min-width:600px){.meta-grid{grid-template-columns:repeat(4,1fr);}}
+.mf{background:var(--light);border:1px solid var(--border);border-radius:var(--radius);padding:6px 8px;}
+.mf label{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:2px;}
+.mf input,.mf select{width:100%;background:transparent;border:none;color:var(--text);font-family:'Noto Sans',Arial,sans-serif;font-size:12px;font-weight:600;outline:none;}
+
+/* call fields */
+.call-fields{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;}
+@media(min-width:600px){.call-fields{grid-template-columns:repeat(3,1fr);}}
+
+/* ── INPUT ── */
+.inputzone{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:8px;}
+.zone-lbl{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;}
+.zone-lbl em{color:var(--text2);font-size:11px;text-transform:none;letter-spacing:0;font-weight:300;font-style:normal;}
+textarea{width:100%;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;color:var(--text);font-family:'Noto Sans',Arial,sans-serif;font-size:13px;line-height:1.7;resize:none;outline:none;transition:var(--t);}
+textarea:focus{border-color:var(--p2925);box-shadow:0 0 0 3px rgba(0,156,222,.08);}
+textarea::placeholder{color:var(--text3);font-weight:300;}
+.ctx-area{border-style:dashed;border-color:rgba(0,40,85,.2);height:64px;}
+.cust-area{background:rgba(0,156,222,.03);border-color:rgba(0,156,222,.2);height:80px;}
+.call-hint{background:rgba(0,156,222,.05);border:1px solid rgba(0,156,222,.15);border-radius:var(--radius);padding:10px 12px;font-size:11px;color:var(--text2);font-weight:300;line-height:1.6;}
+.call-hint strong{color:var(--p295);font-weight:600;}
+.hidden{display:none!important;}
+
+/* ── ACTION BAR ── */
+.actionbar{background:var(--white);border-top:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;}
+.ccount{font-size:11px;color:var(--text3);font-weight:300;}
+.abtns{display:flex;gap:6px;}
+.btn-clear{background:transparent;color:var(--text3);border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;font-size:11px;font-family:'Noto Sans',Arial,sans-serif;cursor:pointer;transition:var(--t);}
+.btn-clear:hover{color:var(--text);border-color:var(--text3);}
+.btn-run{background:var(--p295);color:#fff;border:none;border-radius:var(--radius);padding:8px 18px;font-size:11px;font-weight:700;font-family:'Noto Sans',Arial,sans-serif;cursor:pointer;transition:var(--t);text-transform:uppercase;letter-spacing:1px;}
+.btn-run:hover{background:var(--p2925);}
+.btn-run:disabled{opacity:.4;cursor:not-allowed;}
+
+/* ── MODAL ── */
+.overlay{position:fixed;inset:0;background:rgba(0,40,85,.65);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);}
+.overlay.hidden{display:none!important;}
+.modal{background:#fff;border-radius:10px;padding:24px;width:400px;max-width:92vw;border-top:3px solid var(--p2925);}
+.modal-title{font-size:15px;font-weight:700;color:var(--p295);margin-bottom:6px;}
+.modal-desc{font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:16px;font-weight:300;}
+.modal input{width:100%;background:var(--light);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;color:var(--text);font-family:'Noto Sans',Arial,sans-serif;font-size:13px;outline:none;margin-bottom:8px;}
+.modal input:focus{border-color:var(--p2925);}
+.modal-note{font-size:11px;color:var(--text3);margin-bottom:16px;font-weight:300;}
+.btn-save{background:var(--p295);color:#fff;border:none;border-radius:var(--radius);padding:9px 16px;font-family:'Noto Sans',Arial,sans-serif;font-weight:700;font-size:11px;cursor:pointer;text-transform:uppercase;letter-spacing:.8px;transition:var(--t);}
+.btn-save:hover{background:var(--p2925);}
+.btn-cancel{background:transparent;color:var(--text3);border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;font-family:'Noto Sans',Arial,sans-serif;font-size:11px;cursor:pointer;margin-left:6px;transition:var(--t);}
+
+/* ── RESULTS ── */
+.results{position:fixed;inset:0;background:var(--light);z-index:150;display:flex;flex-direction:column;}
+.results.hidden{display:none!important;}
+.res-header{background:var(--p295);padding:0 16px;height:50px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:8px;}
+.res-left{display:flex;align-items:center;gap:8px;min-width:0;}
+.res-title{color:#fff;font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.res-folio{color:var(--grey);font-size:10px;font-weight:300;white-space:nowrap;}
+.res-btns{display:flex;gap:5px;flex-shrink:0;}
+.btn-exp{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:var(--radius);padding:5px 10px;font-size:10px;font-weight:700;font-family:'Noto Sans',Arial,sans-serif;cursor:pointer;transition:var(--t);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+.btn-exp:hover{background:var(--p2925);border-color:var(--p2925);}
+.btn-bk{background:transparent;color:var(--grey);border:1px solid rgba(255,255,255,.12);border-radius:var(--radius);padding:5px 10px;font-size:10px;font-family:'Noto Sans',Arial,sans-serif;cursor:pointer;transition:var(--t);}
+.btn-bk:hover{color:#fff;}
+.res-tabs{background:var(--p295);border-top:1px solid rgba(255,255,255,.1);padding:0 16px;display:flex;gap:2px;flex-shrink:0;overflow-x:auto;}
+.res-tab{background:transparent;color:var(--grey);border:none;border-bottom:2px solid transparent;padding:8px 14px;font-family:'Noto Sans',Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;cursor:pointer;transition:var(--t);white-space:nowrap;}
+.res-tab:hover{color:#fff;}
+.res-tab.active{color:#fff;border-bottom-color:var(--p2925);}
+.res-body{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+.tab-panel{flex:1;overflow-y:auto;padding:20px 16px;display:flex;justify-content:center;}
+@media(min-width:600px){.tab-panel{padding:28px 24px;}}
+
+/* ── LOADING ── */
+.loading{display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;width:100%;}
+.loading.on{display:flex;}
+.spinner{width:38px;height:38px;border:2px solid var(--border);border-top-color:var(--p2925);border-radius:50%;animation:spin .75s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.spin-lbl{font-size:13px;font-weight:600;color:var(--p295);}
+.spin-sub{font-size:11px;color:var(--text3);font-weight:300;}
+
+/* ── MINUTA ── */
+.minuta-wrap{width:100%;max-width:800px;}
+.minuta{background:#fff;border:1px solid var(--border);box-shadow:0 2px 20px rgba(0,40,85,.07);overflow:hidden;}
+.m-head{background:var(--p295);padding:20px 24px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+.m-doc-type{color:var(--grey);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-bottom:3px;}
+.m-doc-title{color:#fff;font-size:16px;font-weight:700;line-height:1.2;}
+.m-head-right{text-align:right;flex-shrink:0;}
+.m-company{color:var(--grey);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-bottom:3px;}
+.m-folio{color:#fff;font-size:11px;font-weight:600;}
+.m-datetime{color:var(--grey);font-size:10px;font-weight:300;margin-top:2px;}
+.m-accent{background:var(--p2925);height:3px;}
+.m-strip{background:#eef3f8;border-bottom:1px solid var(--border);padding:10px 24px;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+@media(min-width:600px){.m-strip{grid-template-columns:repeat(4,1fr);}}
+.ms-item label{font-size:8px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:2px;}
+.ms-item span{font-size:11px;font-weight:600;color:var(--p295);}
+.m-body{padding:20px 24px;font-size:13px;line-height:1.75;color:#2c3e50;}
+.m-body h1{display:none;}
+.m-body h2{font-size:10px;font-weight:700;color:var(--p2925);text-transform:uppercase;letter-spacing:1.2px;margin:20px 0 8px;padding-bottom:5px;border-bottom:2px solid var(--p2925);}
+.m-body h3{font-size:12px;font-weight:700;color:var(--p295);margin:12px 0 5px;}
+.m-body p{margin-bottom:8px;color:#3d4f5f;}
+.m-body ul{padding-left:16px;margin-bottom:10px;}
+.m-body li{margin-bottom:4px;color:#3d4f5f;}
+.m-body strong{color:var(--p295);font-weight:600;}
+.m-body table{width:100%;border-collapse:collapse;margin:8px 0 16px;font-size:11px;}
+.m-body th{background:var(--p295);color:#fff;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;padding:7px 8px;text-align:left;}
+.m-body td{padding:7px 8px;border-bottom:1px solid var(--border);color:#3d4f5f;vertical-align:top;}
+.m-body tr:nth-child(even) td{background:#f7fafc;}
+.m-body pre{background:#f0f5fa;border-left:3px solid var(--p2925);border-radius:3px;padding:10px 12px;font-size:11px;font-family:monospace;line-height:1.6;color:#3d4f5f;margin:8px 0;overflow-x:auto;}
+.m-body code{background:#eef3f8;border-radius:3px;padding:1px 5px;font-size:11px;font-family:monospace;color:var(--p295);}
+.bu{background:rgba(255,50,50,.08);color:#aa1122;border:1px solid rgba(255,50,50,.2);border-radius:3px;padding:1px 6px;font-size:10px;font-weight:700;}
+.bn{background:rgba(180,130,0,.08);color:#886600;border:1px solid rgba(180,130,0,.2);border-radius:3px;padding:1px 6px;font-size:10px;font-weight:700;}
+.bi{background:rgba(0,156,222,.08);color:var(--p295);border:1px solid rgba(0,156,222,.2);border-radius:3px;padding:1px 6px;font-size:10px;font-weight:700;}
+.m-foot{background:#eef3f8;border-top:1px solid var(--border);padding:14px 24px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;}
+.m-sign-line{width:100px;height:1px;background:var(--p295);margin-bottom:4px;}
+.m-sign-role{font-size:8px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;}
+.m-sign-name{font-size:11px;font-weight:600;color:var(--p295);}
+.m-foot-right{text-align:right;font-size:10px;color:var(--text3);font-weight:300;}
+.conf-tag{display:inline-block;background:var(--p295);color:#fff;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:2px 6px;margin-top:3px;}
+
+/* call badge */
+.call-type-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(0,156,222,.1);color:var(--p295);border:1px solid rgba(0,156,222,.25);border-radius:4px;padding:3px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
+
+/* ── PENDIENTES PANEL ── */
+.pendientes-overlay{position:fixed;inset:0;background:rgba(0,40,85,.65);z-index:300;display:flex;align-items:stretch;justify-content:flex-end;backdrop-filter:blur(3px);}
+.pendientes-overlay.hidden{display:none!important;}
+.pendientes-drawer{background:var(--white);width:100%;max-width:480px;display:flex;flex-direction:column;animation:slideIn .2s ease;}
+@keyframes slideIn{from{transform:translateX(100%);}to{transform:translateX(0);}}
+.pd-header{background:var(--p295);padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.pd-title{color:#fff;font-size:14px;font-weight:700;}
+.pd-count{color:var(--grey);font-size:11px;font-weight:300;}
+.pd-close{background:transparent;color:var(--grey);border:1px solid rgba(255,255,255,.15);border-radius:var(--radius);padding:5px 10px;font-size:11px;font-family:'Noto Sans',Arial,sans-serif;cursor:pointer;}
+.pd-close:hover{color:#fff;}
+.pd-accent{background:var(--p2925);height:3px;flex-shrink:0;}
+.pd-filters{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;gap:6px;flex-shrink:0;overflow-x:auto;}
+.pd-filter{background:transparent;border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--text3);cursor:pointer;font-family:'Noto Sans',Arial,sans-serif;white-space:nowrap;transition:var(--t);}
+.pd-filter:hover{border-color:var(--p2925);color:var(--p295);}
+.pd-filter.active{background:var(--p295);color:#fff;border-color:var(--p295);}
+.pd-body{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:8px;}
+.pd-empty{text-align:center;padding:40px 20px;color:var(--text3);}
+.pd-empty-icon{font-size:32px;margin-bottom:8px;}
+.pd-empty-text{font-size:12px;font-weight:300;}
+.task-card{background:var(--light);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;display:flex;gap:10px;align-items:flex-start;transition:var(--t);}
+.task-card:hover{border-color:var(--p2925);}
+.task-card.done{opacity:.5;}
+.task-card.done .task-title{text-decoration:line-through;}
+.task-check{width:18px;height:18px;border:2px solid var(--border);border-radius:3px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:var(--t);margin-top:1px;}
+.task-check:hover{border-color:var(--p2925);}
+.task-check.checked{background:var(--p295);border-color:var(--p295);}
+.task-check.checked::after{content:'✓';color:#fff;font-size:11px;font-weight:700;}
+.task-body{flex:1;min-width:0;}
+.task-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px;line-height:1.4;}
+.task-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.task-prio{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:1px 6px;border-radius:2px;}
+.prio-urgent{background:rgba(204,34,51,.1);color:var(--urgent);border:1px solid rgba(204,34,51,.2);}
+.prio-normal{background:rgba(136,102,0,.1);color:var(--normal);border:1px solid rgba(136,102,0,.2);}
+.prio-info{background:rgba(0,156,222,.1);color:var(--p295);border:1px solid rgba(0,156,222,.2);}
+.task-who{font-size:10px;color:var(--text3);font-weight:300;}
+.task-source{font-size:9px;color:var(--text3);font-weight:300;background:var(--border);border-radius:2px;padding:1px 5px;}
+.task-deadline{font-size:10px;color:var(--urgent);font-weight:600;}
+.pd-footer{padding:12px 16px;border-top:1px solid var(--border);flex-shrink:0;display:flex;gap:8px;justify-content:flex-end;}
+.btn-clear-done{background:transparent;color:var(--text3);border:1px solid var(--border);border-radius:var(--radius);padding:7px 14px;font-size:11px;font-family:'Noto Sans',Arial,sans-serif;cursor:pointer;transition:var(--t);}
+.btn-clear-done:hover{color:var(--urgent);border-color:var(--urgent);}
+
+/* ── MIND MAP ── */
+.mm-panel{width:100%;display:flex;flex-direction:column;}
+.mm-toolbar{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-shrink:0;flex-wrap:wrap;}
+.mm-toolbar span{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;}
+.mm-tbtn{background:transparent;border:1px solid var(--border);border-radius:var(--radius);padding:4px 10px;font-family:'Noto Sans',Arial,sans-serif;font-size:11px;color:var(--text2);cursor:pointer;transition:var(--t);}
+.mm-tbtn:hover{background:var(--light);border-color:var(--p2925);color:var(--p295);}
+.mm-legend{display:flex;gap:10px;margin-left:auto;align-items:center;flex-wrap:wrap;}
+.mm-leg-item{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--text3);font-weight:300;}
+.mm-leg-dot{width:8px;height:8px;border-radius:50%;}
+#mmCanvas{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);cursor:grab;display:block;width:100%;touch-action:none;}
+#mmCanvas:active{cursor:grabbing;}
+
+@media print{.res-header,.res-tabs{display:none!important;}.tab-panel{overflow:visible;}.minuta{border:none;box-shadow:none;}}
+::-webkit-scrollbar{width:4px;height:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<!-- API MODAL -->
+<div class="overlay hidden" id="apiModal">
+  <div class="modal">
+    <div class="modal-title">Configurar API Key</div>
+    <div class="modal-desc">Tu clave Anthropic se guarda exclusivamente en este navegador. No se transmite a ningún servidor externo.</div>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." autocomplete="off"/>
+    <div class="modal-note">🔒 Solo en tu dispositivo — confidencial.</div>
+    <button class="btn-save" onclick="saveKey()">Guardar</button>
+    <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+  </div>
+</div>
+
+<!-- PENDIENTES DRAWER -->
+<div class="pendientes-overlay hidden" id="pendientesOverlay">
+  <div class="pendientes-drawer">
+    <div class="pd-header">
+      <div>
+        <div class="pd-title">🗂 Mis Pendientes</div>
+        <div class="pd-count" id="pdCount">0 tareas activas</div>
+      </div>
+      <button class="pd-close" onclick="closePendientes()">✕ Cerrar</button>
+    </div>
+    <div class="pd-accent"></div>
+    <div class="pd-filters">
+      <button class="pd-filter active" onclick="filterPD('all')">Todas</button>
+      <button class="pd-filter" onclick="filterPD('urgent')">🔴 Urgentes</button>
+      <button class="pd-filter" onclick="filterPD('normal')">🟡 Normales</button>
+      <button class="pd-filter" onclick="filterPD('mine')">👤 Mis tareas</button>
+      <button class="pd-filter" onclick="filterPD('call')">📞 De llamadas</button>
+      <button class="pd-filter" onclick="filterPD('meeting')">📋 De juntas</button>
+    </div>
+    <div class="pd-body" id="pdBody">
+      <div class="pd-empty"><div class="pd-empty-icon">✅</div><div class="pd-empty-text">Sin pendientes aún.<br>Analiza una reunión o llamada para verlos aquí.</div></div>
+    </div>
+    <div class="pd-footer">
+      <button class="btn-clear-done" onclick="clearDone()">🗑 Limpiar completadas</button>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div style="display:flex;align-items:center;min-width:0;">
+    <div class="hbrand"><div class="hname">Marelli</div><div class="hsub">AI Meeting Annotator</div></div>
+    <div class="haccent"></div>
+    <div class="hmid">Logística · Aduanas · Supply Chain</div>
+  </div>
+  <div class="hright">
+    <button class="pending-btn" onclick="openPendientes()">🗂 Pendientes <span class="pending-count" id="pendingBadge">0</span></button>
+    <button class="api-btn" id="apiBadge" onclick="openModal()">API Key</button>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+  <!-- SIDEBAR (desktop) -->
+  <div class="sidebar">
+    <div class="sb-section">
+      <div class="sb-label">Plantillas</div>
+      <button class="tpl active" onclick="selTpl(0)" id="t0"><span class="tpl-ico">🚢</span><div><div class="tpl-name">Revisión de Embarques</div><div class="tpl-desc">Status, ETA/ETD, loads</div></div></button>
+      <button class="tpl" onclick="selTpl(1)" id="t1"><span class="tpl-ico">💰</span><div><div class="tpl-name">Presupuesto / Costeo</div><div class="tpl-desc">Budget vs real, desviaciones</div></div></button>
+      <button class="tpl" onclick="selTpl(2)" id="t2"><span class="tpl-ico">🤝</span><div><div class="tpl-name">Coordinación Proveedores</div><div class="tpl-desc">Compromisos, issues</div></div></button>
+      <button class="tpl" onclick="selTpl(3)" id="t3"><span class="tpl-ico">🧾</span><div><div class="tpl-name">Estado de Cuenta</div><div class="tpl-desc">Saldos, facturas, pagos</div></div></button>
+      <button class="tpl" onclick="selTpl(4)" id="t4"><span class="tpl-ico">🏢</span><div><div class="tpl-name">Junta de Sala</div><div class="tpl-desc">Multi-depto, kanban</div></div></button>
+      <button class="tpl" onclick="selTpl(5)" id="t5"><span class="tpl-ico">📞</span><div><div class="tpl-name">Llamada Espontánea <span class="tpl-new">NEW</span></div><div class="tpl-desc">Auto-detecta tipo y contexto</div></div></button>
+      <button class="tpl" onclick="selTpl(6)" id="t6"><span class="tpl-ico">✏️</span><div><div class="tpl-name">Libre / Personalizada</div><div class="tpl-desc">Define tu propio prompt</div></div></button>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Historial</div>
+      <div id="histList"><div style="font-size:11px;color:var(--text3);padding:4px 14px;font-weight:300;">Sin registros aún</div></div>
+    </div>
+  </div>
+
+  <!-- WORKSPACE -->
+  <div class="workspace">
+    <!-- Mobile template bar -->
+    <div class="mobile-tpl-bar">
+      <button class="mob-tpl active" onclick="selTpl(0)" id="mt0">🚢 Embarques</button>
+      <button class="mob-tpl" onclick="selTpl(1)" id="mt1">💰 Presupuesto</button>
+      <button class="mob-tpl" onclick="selTpl(2)" id="mt2">🤝 Proveedores</button>
+      <button class="mob-tpl" onclick="selTpl(3)" id="mt3">🧾 Cuentas</button>
+      <button class="mob-tpl" onclick="selTpl(4)" id="mt4">🏢 Sala</button>
+      <button class="mob-tpl" onclick="selTpl(5)" id="mt5">📞 Llamada</button>
+      <button class="mob-tpl" onclick="selTpl(6)" id="mt6">✏️ Libre</button>
+    </div>
+
+    <div class="topbar">
+      <div class="topbar-row1">
+        <span class="cur-icon" id="cIcon">🚢</span>
+        <span class="cur-name" id="cName">Revisión de Embarques</span>
+        <span class="cur-tag" id="cTag">OCEAN / AIR / GROUND</span>
+      </div>
+      <div class="meta-grid">
+        <div class="mf"><label>Fecha</label><input type="date" id="mFecha"/></div>
+        <div class="mf"><label>Hora</label><input type="time" id="mHora"/></div>
+        <div class="mf"><label>Lugar / Sala</label><input type="text" id="mLugar" placeholder="Sala de Juntas A"/></div>
+        <div class="mf"><label>Dirigida a</label><select id="mDirigida"><option>Equipo Interno</option><option>Cliente</option><option>Proveedor</option><option>Dirección General</option><option>Mixto</option></select></div>
+      </div>
+      <!-- Call-specific fields -->
+      <div class="call-fields hidden" id="callFields">
+        <div class="mf"><label>📞 Quién llamó</label><input type="text" id="callWho" placeholder="Ej: Carlos — Jefe Operaciones"/></div>
+        <div class="mf"><label>Duración aprox.</label><input type="text" id="callDur" placeholder="Ej: 8 min"/></div>
+        <div class="mf"><label>Título / Tema</label><input type="text" id="callTitle" placeholder="Ej: Urgencia embarque MX-447"/></div>
+      </div>
+    </div>
+
+    <div class="inputzone">
+      <div id="callHintWrap" class="hidden">
+        <div class="call-hint">
+          <strong>📱 Flujo iPhone:</strong> Action Button → graba con Notas de Voz → iOS transcribe automáticamente → copia el texto → pégalo aquí.<br>
+          La IA detectará el tipo de llamada y extraerá tus tareas automáticamente.
+        </div>
+      </div>
+      <div class="zone-lbl">Transcripción / Notas &nbsp;<em id="hint">— pega el texto de la reunión</em></div>
+      <textarea id="txMain" rows="8" placeholder="Pega aquí la transcripción o escribe las notas de la reunión..." oninput="upCount()"></textarea>
+      <div id="ctxWrap" class="hidden">
+        <div class="zone-lbl">Contexto previo &nbsp;<em>— pendientes de reunión anterior (opcional)</em></div>
+        <textarea id="txCtx" class="ctx-area" placeholder="Ej: Seguimiento a junta del 15-ene. Pendientes: confirmación proveedor X..."></textarea>
+      </div>
+      <div id="custWrap" class="hidden">
+        <div class="zone-lbl">Prompt personalizado &nbsp;<em>— define qué debe extraer la IA</em></div>
+        <textarea id="txCust" class="cust-area" placeholder="Ej: Extrae los KPIs mencionados, acuerdos comerciales y fechas de entrega..."></textarea>
+      </div>
+    </div>
+
+    <div class="actionbar">
+      <div class="ccount" id="cc">0 caracteres</div>
+      <div class="abtns">
+        <button class="btn-clear" onclick="clearAll()">Limpiar</button>
+        <button class="btn-run" id="runBtn" onclick="analyze()">▶ Analizar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="results hidden" id="resPanel">
+  <div class="res-header">
+    <div class="res-left">
+      <span id="rIcon" style="font-size:16px">🚢</span>
+      <div style="min-width:0;">
+        <div class="res-title" id="rTitle">Resultado</div>
+        <div class="res-folio" id="rFolio">—</div>
+      </div>
+    </div>
+    <div class="res-btns">
+      <button class="btn-exp" onclick="expHTML()">⬇ HTML</button>
+      <button class="btn-exp" onclick="expMd()">⬇ MD</button>
+      <button class="btn-exp" onclick="doPrint()">🖨 PDF</button>
+      <button class="btn-bk" onclick="closeRes()">← Volver</button>
+    </div>
+  </div>
+  <div class="res-tabs">
+    <button class="res-tab active" onclick="switchTab('minuta')" id="tab-minuta">📄 Minuta</button>
+    <button class="res-tab" onclick="switchTab('mapa')" id="tab-mapa">🧠 Mapa Mental</button>
+  </div>
+  <div class="res-body">
+    <div class="loading tab-panel" id="loadDiv" style="overflow:hidden;">
+      <div class="spinner"></div>
+      <div class="spin-lbl">Analizando...</div>
+      <div class="spin-sub" id="loadTxt">Procesando transcripción</div>
+    </div>
+    <div class="tab-panel" id="panel-minuta" style="display:none;">
+      <div class="minuta-wrap"><div class="minuta" id="minutaDoc"></div></div>
+    </div>
+    <div class="tab-panel" id="panel-mapa" style="display:none;padding:16px;">
+      <div class="mm-panel" style="width:100%;max-width:1000px;">
+        <div class="mm-toolbar">
+          <span>Mapa Mental</span>
+          <button class="mm-tbtn" onclick="mmZoomIn()">＋</button>
+          <button class="mm-tbtn" onclick="mmZoomOut()">－</button>
+          <button class="mm-tbtn" onclick="mmFit()">⊡ Ajustar</button>
+          <button class="mm-tbtn" onclick="mmReset()">↺ Centrar</button>
+          <div class="mm-legend">
+            <div class="mm-leg-item"><div class="mm-leg-dot" style="background:#002855"></div>Central</div>
+            <div class="mm-leg-item"><div class="mm-leg-dot" style="background:#009CDE"></div>Principal</div>
+            <div class="mm-leg-item"><div class="mm-leg-dot" style="background:#A6BBC8"></div>Subtema</div>
+          </div>
+        </div>
+        <canvas id="mmCanvas" height="520"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── TEMPLATES ─────────────────────────────────────────────────────
+const T=[
+  {ico:'🚢',name:'Revisión de Embarques',tag:'OCEAN / AIR / GROUND',hint:'— transcripción de status de embarques',ctx:false,cust:false,call:false,
+   sys:`Eres asistente de logística internacional. Genera DOS outputs:
+=== MINUTA ===
+## 1. RESUMEN EJECUTIVO
+## 2. TABLA DE EMBARQUES
+Tabla: Load # | Modo | Origen→Destino | ETD | ETA | Status | Incidencia
+## 3. INCIDENCIAS Y ALERTAS
+## 4. ACUERDOS Y RESPONSABLES
+Por acuerdo: descripción, responsable asignado, fecha límite, prioridad (🔴 URGENTE / 🟡 NORMAL / 🔵 INFORMATIVO)
+## 5. MIS TAREAS (tareas asignadas al Gerente de Logística)
+Lista destacada de tareas propias.
+## 6. KPI SNAPSHOT
+## 7. PRÓXIMA REVISIÓN
+=== MAPA_MENTAL ===
+{"centro":"[tema central max 4 palabras]","ramas":[{"label":"[rama]","color":"#009CDE","hijos":[{"label":"[subtema]","hijos":[{"label":"[detalle]"}]}]}]}`},
+  {ico:'💰',name:'Presupuesto / Costeo Logístico',tag:'BUDGET & COST',hint:'— notas de revisión financiera',ctx:false,cust:false,call:false,
+   sys:`Eres analista de costos logísticos. Genera DOS outputs:
+=== MINUTA ===
+## 1. RESUMEN EJECUTIVO
+## 2. TABLA DE COSTOS
+Tabla: Categoría | Presupuesto | Real | Desviación $ | %
+## 3. ALERTAS DE SOBRECOSTO
+## 4. APROBACIONES Y RECHAZOS
+## 5. ACUERDOS FINANCIEROS
+Por acuerdo: descripción, monto, responsable, fecha, prioridad (🔴 URGENTE / 🟡 NORMAL / 🔵 INFORMATIVO)
+## 6. MIS TAREAS
+## 7. KPIs FINANCIEROS
+=== MAPA_MENTAL ===
+{"centro":"[tema]","ramas":[{"label":"[rama]","color":"#009CDE","hijos":[{"label":"[sub]","hijos":[]}]}]}`},
+  {ico:'🤝',name:'Coordinación con Proveedores',tag:'VENDORS & AGENTS',hint:'— junta con agentes/carriers',ctx:false,cust:false,call:false,
+   sys:`Eres coordinador supply chain. Genera DOS outputs:
+=== MINUTA ===
+## 1. RESUMEN EJECUTIVO
+## 2. COMPROMISOS POR PROVEEDOR
+## 3. ISSUES DE SERVICIO
+Tabla: Issue | Proveedor | Impacto | Status
+## 4. TABLA DE LOADS COORDINADOS
+Tabla: Load # | Proveedor | Ruta | Status | Observación
+## 5. ACUERDOS NUEVOS
+Por acuerdo: descripción, responsable, fecha, prioridad (🔴 URGENTE / 🟡 NORMAL / 🔵 INFORMATIVO)
+## 6. MIS TAREAS
+## 7. KPIs DE SERVICIO
+=== MAPA_MENTAL ===
+{"centro":"[tema]","ramas":[{"label":"[rama]","color":"#009CDE","hijos":[{"label":"[sub]","hijos":[]}]}]}`},
+  {ico:'🧾',name:'Estado de Cuenta — Proveedores',tag:'A/P & BILLING',hint:'— cuentas por pagar',ctx:false,cust:false,call:false,
+   sys:`Eres especialista en A/P logístico. Genera DOS outputs:
+=== MINUTA ===
+## 1. RESUMEN EJECUTIVO
+## 2. ESTADO DE CUENTA POR PROVEEDOR
+Tabla: Proveedor | Saldo Total | Por Vencer | Vencido | En Disputa
+## 3. TABLA DE LOADS / VIAJES
+Tabla: Load # | Proveedor | Factura # | Monto | Status Pago | Días Vencido
+## 4. ACUERDOS DE PAGO
+Por acuerdo: proveedor, monto, fecha, responsable, prioridad (🔴 URGENTE / 🟡 NORMAL / 🔵 INFORMATIVO)
+## 5. MIS TAREAS
+## 6. CALENDARIO DE PAGOS
+=== MAPA_MENTAL ===
+{"centro":"[tema]","ramas":[{"label":"[rama]","color":"#009CDE","hijos":[{"label":"[sub]","hijos":[]}]}]}`},
+  {ico:'🏢',name:'Junta de Sala Multi-departamento',tag:'MULTI-DEPT · KANBAN',hint:'— transcripción interna',ctx:true,cust:false,call:false,
+   sys:`Eres experto en juntas corporativas multi-depto. Genera DOS outputs:
+=== MINUTA ===
+## 1. PARTICIPANTES DETECTADOS
+Tabla: Nombre/Rol | Departamento | Participación | Tareas
+## 2. RESUMEN EJECUTIVO
+## 3. KANBAN DE TAREAS
+**[ DEPARTAMENTO ]**
+- 🔴/🟡/🔵 Tarea → Responsable / Deadline
+## 4. TAREAS CRUZADAS
+Tabla: Tarea | Departamentos | Coordinador | Deadline | Prioridad
+## 5. MIS TAREAS (asignadas al Gerente de Logística)
+## 6. PENDIENTES SIN RESPONSABLE
+=== MAPA_MENTAL ===
+{"centro":"[tema]","ramas":[{"label":"[rama]","color":"#009CDE","hijos":[{"label":"[sub]","hijos":[]}]}]}`},
+  {ico:'📞',name:'Llamada Espontánea',tag:'LLAMADA · AUTO-DETECT',hint:'— pega la transcripción del iPhone',ctx:false,cust:false,call:true,
+   sys:`Eres asistente de logística y aduanas experto en capturar llamadas espontáneas.
+
+PASO 1 — DETECTA automáticamente:
+- Quién llamó y su rol (Jefe, Proveedor, Cliente, Agente Aduanal, Equipo interno)
+- El tipo de llamada (instrucciones de jefe / coordinación logística / problema urgente / seguimiento / estado de cuenta / otro)
+- Nivel de urgencia general
+
+PASO 2 — Genera DOS outputs:
+
+=== MINUTA ===
+Primero escribe una sola línea:
+TIPO DETECTADO: [tipo de llamada] | QUIÉN: [nombre/rol inferido] | URGENCIA: [🔴 Alta / 🟡 Media / 🔵 Baja]
+
+Luego:
+## RESUMEN DE LA LLAMADA
+2-3 líneas del tema central.
+
+## MIS TAREAS (lo que ME asignaron a mí — Gerente de Logística)
+Lista con prioridad y deadline si se menciona. Formato:
+- 🔴/🟡/🔵 [Tarea] → Deadline: [fecha/plazo] | Asignado por: [quien]
+
+## TAREAS DE OTROS
+Compromisos adquiridos por otras personas en la llamada.
+Formato: **[Nombre/Rol]**: tarea, deadline
+
+## INFORMACIÓN RELEVANTE
+Datos, números, referencias, loads, facturas o cualquier dato importante mencionado.
+
+## PRÓXIMO PASO
+Qué debe pasar después de esta llamada.
+
+=== MAPA_MENTAL ===
+{"centro":"[tema central llamada]","ramas":[{"label":"[rama]","color":"#009CDE","hijos":[{"label":"[sub]","hijos":[]}]}]}`},
+  {ico:'✏️',name:'Libre / Personalizada',tag:'CUSTOM',hint:'— define tu análisis',ctx:false,cust:true,call:false,sys:null}
+];
+
+// ── STATE ─────────────────────────────────────────────────────────
+let curTpl=0,lastMd='',lastFolio='',lastMeta={},mmData=null,pdFilter='all';
+let mmScale=1,mmOffX=0,mmOffY=0,mmDrag=false,mmDSX=0,mmDSY=0,mmDOX=0,mmDOY=0;
+
+// ── INIT ──────────────────────────────────────────────────────────
+window.onload=()=>{
+  const n=new Date(),p=x=>String(x).padStart(2,'0');
+  document.getElementById('mFecha').value=n.toISOString().split('T')[0];
+  document.getElementById('mHora').value=`${p(n.getHours())}:${p(n.getMinutes())}`;
+  // check URL param for shortcut integration
+  const params=new URLSearchParams(window.location.search);
+  if(params.get('tx')){
+    selTpl(5);
+    document.getElementById('txMain').value=decodeURIComponent(params.get('tx'));
+    upCount();
+    if(params.get('who'))document.getElementById('callWho').value=decodeURIComponent(params.get('who'));
+    if(params.get('title'))document.getElementById('callTitle').value=decodeURIComponent(params.get('title'));
+  }
+  checkKey();loadHist();updatePendingBadge();
+  window.addEventListener('resize',()=>{if(mmData)drawMM();});
+};
+
+// ── API KEY ───────────────────────────────────────────────────────
+function checkKey(){const k=localStorage.getItem('anthropic_api_key'),b=document.getElementById('apiBadge');if(k){b.textContent='✓ API';b.classList.add('on');}else{b.textContent='API Key';b.classList.remove('on');}}
+function openModal(){const k=localStorage.getItem('anthropic_api_key');if(k)document.getElementById('apiKeyInput').value=k;document.getElementById('apiModal').classList.remove('hidden');}
+function closeModal(){document.getElementById('apiModal').classList.add('hidden');}
+function saveKey(){const k=document.getElementById('apiKeyInput').value.trim();if(!k)return;localStorage.setItem('anthropic_api_key',k);closeModal();checkKey();}
+
+// ── TEMPLATES ─────────────────────────────────────────────────────
+function selTpl(i){
+  curTpl=i;
+  document.querySelectorAll('.tpl').forEach((b,j)=>b.classList.toggle('active',j===i));
+  document.querySelectorAll('.mob-tpl').forEach((b,j)=>b.classList.toggle('active',j===i));
+  const t=T[i];
+  document.getElementById('cIcon').textContent=t.ico;
+  document.getElementById('cName').textContent=t.name;
+  document.getElementById('cTag').textContent=t.tag;
+  document.getElementById('hint').textContent=t.hint;
+  document.getElementById('ctxWrap').classList.toggle('hidden',!t.ctx);
+  document.getElementById('custWrap').classList.toggle('hidden',!t.cust);
+  document.getElementById('callFields').classList.toggle('hidden',!t.call);
+  document.getElementById('callHintWrap').classList.toggle('hidden',!t.call);
+  // update lugar placeholder
+  document.getElementById('mLugar').placeholder=t.call?'Ej: Teléfono / Teams':'Sala de Juntas A';
+  document.getElementById('mDirigida').parentElement.querySelector('label').textContent=t.call?'Tipo contacto':'Dirigida a';
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────
+function upCount(){document.getElementById('cc').textContent=document.getElementById('txMain').value.length.toLocaleString()+' caracteres';}
+function clearAll(){['txMain','txCtx','txCust'].forEach(id=>document.getElementById(id).value='');upCount();}
+function folio(){
+  const d=new Date(),p=x=>String(x).padStart(2,'0');
+  const prefix=curTpl===5?'CALL':'MTG';
+  return `${prefix}-${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${p(Math.floor(Math.random()*99)+1)}`;
+}
+
+// ── TABS ──────────────────────────────────────────────────────────
+function switchTab(tab){
+  ['minuta','mapa'].forEach(t=>{document.getElementById('panel-'+t).style.display='none';document.getElementById('tab-'+t).classList.remove('active');});
+  document.getElementById('panel-'+tab).style.display='flex';
+  document.getElementById('tab-'+tab).classList.add('active');
+  if(tab==='mapa'&&mmData)setTimeout(()=>{mmFit();drawMM();},50);
+}
+
+// ── ANALYZE ───────────────────────────────────────────────────────
+async function analyze(){
+  const key=localStorage.getItem('anthropic_api_key');
+  if(!key){openModal();return;}
+  const tx=document.getElementById('txMain').value.trim();
+  if(!tx){alert('Pega la transcripción antes de analizar.');return;}
+  const t=T[curTpl];
+  const sys=curTpl===6?(document.getElementById('txCust').value.trim()||'Analiza esta transcripción. Responde con:\n=== MINUTA ===\nResumen, acuerdos, responsables, próximos pasos.\n\n=== MAPA_MENTAL ===\n{"centro":"Reunión","ramas":[{"label":"Tema","color":"#009CDE","hijos":[]}]}'):t.sys;
+  const ctx=document.getElementById('txCtx').value.trim();
+  const isCall=curTpl===5;
+  const callWho=document.getElementById('callWho').value.trim();
+  const callDur=document.getElementById('callDur').value.trim();
+  const callTitle=document.getElementById('callTitle').value.trim();
+  const meta={
+    fecha:document.getElementById('mFecha').value,
+    hora:document.getElementById('mHora').value,
+    lugar:document.getElementById('mLugar').value||(isCall?'Teléfono':'No especificado'),
+    dirigida:document.getElementById('mDirigida').value,
+    folio:folio(),tName:t.name,tIco:t.ico,isCall,
+    callWho,callDur,callTitle:callTitle||(isCall?'Llamada espontánea':t.name)
+  };
+  lastFolio=meta.folio;lastMeta=meta;
+
+  let bodyParts=[`METADATOS: Folio: ${meta.folio} | Fecha: ${meta.fecha} ${meta.hora} | Tipo: ${t.name}`];
+  if(isCall){
+    if(callWho)bodyParts.push(`Quién llamó: ${callWho}`);
+    if(callDur)bodyParts.push(`Duración: ${callDur}`);
+    if(callTitle)bodyParts.push(`Título/Tema: ${callTitle}`);
+  }else{
+    bodyParts.push(`Lugar: ${meta.lugar} | Dirigida a: ${meta.dirigida}`);
+  }
+  if(ctx)bodyParts.push(`\nCONTEXTO PREVIO:\n${ctx}`);
+  bodyParts.push(`\nTRANSCRIPCIÓN:\n${tx}`);
+  const body=bodyParts.join('\n');
+
+  document.getElementById('resPanel').classList.remove('hidden');
+  document.getElementById('loadDiv').style.display='flex';
+  document.getElementById('panel-minuta').style.display='none';
+  document.getElementById('panel-mapa').style.display='none';
+  document.getElementById('tab-minuta').classList.add('active');
+  document.getElementById('tab-mapa').classList.remove('active');
+  document.getElementById('rIcon').textContent=t.ico;
+  document.getElementById('rTitle').textContent=meta.callTitle||t.name;
+  document.getElementById('rFolio').textContent=meta.folio+' · '+meta.fecha+' '+meta.hora;
+
+  const msgs=isCall?
+    ['Detectando tipo de llamada...','Identificando quién llamó...','Extrayendo tus tareas...','Generando registro...']:
+    ['Procesando transcripción...','Identificando ideas centrales...','Generando mapa mental...','Redactando minuta Marelli...'];
+  let mi=0;const iv=setInterval(()=>{document.getElementById('loadTxt').textContent=msgs[++mi%msgs.length];},1800);
+
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,system:sys,messages:[{role:'user',content:body}]})
+    });
+    clearInterval(iv);
+    if(!r.ok){const e=await r.json();throw new Error(e.error?.message||'Error API');}
+    const d=await r.json();
+    const raw=d.content[0]?.text||'';
+    const parts=raw.split(/===\s*MAPA_MENTAL\s*===/i);
+    lastMd=parts[0].replace(/===\s*MINUTA\s*===/i,'').trim();
+    let mmJson=null;
+    if(parts[1]){try{mmJson=JSON.parse(parts[1].trim().replace(/```json|```/g,'').trim());}catch(e){mmJson=buildFallbackMM(lastMd);}}
+    else{mmJson=buildFallbackMM(lastMd);}
+    mmData=mmJson;
+
+    // Extract and save tasks to pendientes
+    extractAndSaveTasks(lastMd,meta);
+
+    document.getElementById('loadDiv').style.display='none';
+    document.getElementById('panel-minuta').style.display='flex';
+    renderMinuta(lastMd,meta,t);
+    setTimeout(()=>{mmFit();drawMM();},100);
+    saveHist(meta.folio,meta.callTitle||t.name,t.ico,meta.fecha,lastMd,meta,mmJson);
+  }catch(e){
+    clearInterval(iv);
+    document.getElementById('loadDiv').style.display='none';
+    document.getElementById('panel-minuta').style.display='flex';
+    document.getElementById('minutaDoc').innerHTML=`<div style="padding:24px;color:#aa1122;background:#fff0f0;border-left:4px solid #cc2233;font-size:13px;">❌ Error: ${e.message}<br><br>Verifica tu API Key.</div>`;
+  }
+}
+
+// ── EXTRACT TASKS ─────────────────────────────────────────────────
+function extractAndSaveTasks(md,meta){
+  const tasks=JSON.parse(localStorage.getItem('marelli_tasks')||'[]');
+  const lines=md.split('\n');
+  let inMyTasks=false,inOtherTasks=false;
+
+  lines.forEach(line=>{
+    const trimmed=line.trim();
+    if(/##.*MIS TAREAS/i.test(trimmed)){inMyTasks=true;inOtherTasks=false;return;}
+    if(/##.*TAREAS DE OTROS/i.test(trimmed)){inMyTasks=false;inOtherTasks=true;return;}
+    if(/^##/.test(trimmed)){inMyTasks=false;inOtherTasks=false;return;}
+
+    if((inMyTasks||inOtherTasks)&&/^[-*•]/.test(trimmed)){
+      const isUrgent=/🔴/.test(trimmed);
+      const isNormal=/🟡/.test(trimmed);
+      const prio=isUrgent?'urgent':isNormal?'normal':'info';
+      const clean=trimmed.replace(/^[-*•]\s*/,'').replace(/🔴|🟡|🔵/g,'').trim();
+      if(clean.length>5){
+        tasks.unshift({
+          id:Date.now()+Math.random(),
+          title:clean,
+          prio,
+          mine:inMyTasks,
+          source:meta.folio,
+          sourceType:meta.isCall?'call':'meeting',
+          sourceName:meta.callTitle||meta.tName,
+          fecha:meta.fecha,
+          done:false,
+          ts:Date.now()
+        });
+      }
+    }
+  });
+
+  const unique=tasks.filter((t,i,a)=>a.findIndex(x=>x.title===t.title&&x.source===t.source)===i);
+  if(unique.length>200)unique.splice(200);
+  localStorage.setItem('marelli_tasks',JSON.stringify(unique));
+  updatePendingBadge();
+}
+
+// ── PENDIENTES ─────────────────────────────────────────────────────
+function updatePendingBadge(){
+  const tasks=JSON.parse(localStorage.getItem('marelli_tasks')||'[]');
+  const active=tasks.filter(t=>!t.done).length;
+  document.getElementById('pendingBadge').textContent=active;
+}
+
+function openPendientes(){
+  document.getElementById('pendientesOverlay').classList.remove('hidden');
+  renderPD();
+}
+function closePendientes(){document.getElementById('pendientesOverlay').classList.add('hidden');}
+
+function filterPD(f){
+  pdFilter=f;
+  document.querySelectorAll('.pd-filter').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderPD();
+}
+
+function renderPD(){
+  const tasks=JSON.parse(localStorage.getItem('marelli_tasks')||'[]');
+  let filtered=tasks;
+  if(pdFilter==='urgent')filtered=tasks.filter(t=>t.prio==='urgent'&&!t.done);
+  else if(pdFilter==='normal')filtered=tasks.filter(t=>t.prio==='normal'&&!t.done);
+  else if(pdFilter==='mine')filtered=tasks.filter(t=>t.mine);
+  else if(pdFilter==='call')filtered=tasks.filter(t=>t.sourceType==='call');
+  else if(pdFilter==='meeting')filtered=tasks.filter(t=>t.sourceType==='meeting');
+
+  const active=tasks.filter(t=>!t.done).length;
+  document.getElementById('pdCount').textContent=`${active} tarea${active!==1?'s':''} activa${active!==1?'s':''}`;
+
+  const body=document.getElementById('pdBody');
+  if(!filtered.length){
+    body.innerHTML=`<div class="pd-empty"><div class="pd-empty-icon">✅</div><div class="pd-empty-text">Sin tareas en esta categoría.</div></div>`;
+    return;
+  }
+
+  // Sort: urgent first, then by date
+  const sorted=[...filtered].sort((a,b)=>{
+    const po={urgent:0,normal:1,info:2};
+    if(a.done!==b.done)return a.done?1:-1;
+    if(po[a.prio]!==po[b.prio])return po[a.prio]-po[b.prio];
+    return b.ts-a.ts;
+  });
+
+  body.innerHTML=sorted.map(t=>{
+    const prioClass=t.prio==='urgent'?'prio-urgent':t.prio==='normal'?'prio-normal':'prio-info';
+    const prioLabel=t.prio==='urgent'?'🔴 Urgente':t.prio==='normal'?'🟡 Normal':'🔵 Info';
+    const srcIco=t.sourceType==='call'?'📞':'📋';
+    // extract deadline from title if present
+    const deadlineMatch=t.title.match(/deadline[:\s]+([^|]+)/i)||t.title.match(/→\s*([^|]+)/i);
+    const deadline=deadlineMatch?deadlineMatch[1].trim():'';
+    const cleanTitle=t.title.replace(/deadline[:\s]+[^|]+/i,'').replace(/→\s*[^|]+/i,'').replace(/\|.*$/,'').trim();
+    return `<div class="task-card${t.done?' done':''}">
+      <div class="task-check${t.done?' checked':''}" onclick="toggleTask('${t.id}')"></div>
+      <div class="task-body">
+        <div class="task-title">${cleanTitle}</div>
+        <div class="task-meta">
+          <span class="task-prio ${prioClass}">${prioLabel}</span>
+          ${t.mine?'<span class="task-who">👤 Mi tarea</span>':''}
+          ${deadline?`<span class="task-deadline">⏰ ${deadline}</span>`:''}
+          <span class="task-source">${srcIco} ${t.sourceName||t.source}</span>
+          <span class="task-who">${t.fecha}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleTask(id){
+  const tasks=JSON.parse(localStorage.getItem('marelli_tasks')||'[]');
+  const task=tasks.find(t=>String(t.id)===String(id));
+  if(task)task.done=!task.done;
+  localStorage.setItem('marelli_tasks',JSON.stringify(tasks));
+  updatePendingBadge();renderPD();
+}
+
+function clearDone(){
+  const tasks=JSON.parse(localStorage.getItem('marelli_tasks')||'[]');
+  const active=tasks.filter(t=>!t.done);
+  localStorage.setItem('marelli_tasks',JSON.stringify(active));
+  updatePendingBadge();renderPD();
+}
+
+// ── RENDER MINUTA ─────────────────────────────────────────────────
+function renderMinuta(md,meta,t){
+  const isCall=meta.isCall;
+  const callBadge=isCall?`<div class="call-type-badge">📞 Registro de Llamada</div>`:'';
+  document.getElementById('minutaDoc').innerHTML=`
+    <div class="m-head">
+      <div><div class="m-doc-type">${isCall?'Registro de Llamada':'Minuta Oficial'}</div><div class="m-doc-title">${meta.callTitle||t.name}</div></div>
+      <div class="m-head-right"><div class="m-company">Marelli</div><div class="m-folio">${meta.folio}</div><div class="m-datetime">${meta.fecha} · ${meta.hora}</div></div>
+    </div>
+    <div class="m-accent"></div>
+    <div class="m-strip">
+      <div class="ms-item"><label>${isCall?'Quién llamó':'Lugar / Sala'}</label><span>${isCall?(meta.callWho||'No especificado'):meta.lugar}</span></div>
+      <div class="ms-item"><label>${isCall?'Duración':'Dirigida a'}</label><span>${isCall?(meta.callDur||'No especificado'):meta.dirigida}</span></div>
+      <div class="ms-item"><label>Responsable</label><span>Gerente de Logística</span></div>
+      <div class="ms-item"><label>Clasificación</label><span>Confidencial Interno</span></div>
+    </div>
+    <div class="m-body">${callBadge}${md2html(md)}</div>
+    <div class="m-foot">
+      <div><div class="m-sign-line"></div><div class="m-sign-role">${isCall?'Registrado por':'Firma responsable'}</div><div class="m-sign-name">Gerente de Logística</div></div>
+      <div class="m-foot-right"><div>Generado: ${new Date().toLocaleString('es-MX')}</div><div class="conf-tag">Confidencial</div></div>
+    </div>`;
+}
+
+// ── MARKDOWN → HTML ───────────────────────────────────────────────
+function md2html(s){
+  let h=s;
+  h=h.replace(/^### (.+)$/gm,'<h3>$1</h3>');
+  h=h.replace(/^## (.+)$/gm,'<h2>$1</h2>');
+  h=h.replace(/^# (.+)$/gm,'<h1>$1</h1>');
+  h=h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  h=h.replace(/\*(.+?)\*/g,'<em>$1</em>');
+  h=h.replace(/(\|.+\|\n)+/g,m=>{
+    const rows=m.trim().split('\n');let t='<table>';
+    rows.forEach((r,i)=>{
+      if(/^\|[-:\s|]+\|$/.test(r.trim()))return;
+      const cells=r.split('|').filter(c=>c.trim()!=='');
+      t+=i===0?'<tr>'+cells.map(c=>`<th>${c.trim()}</th>`).join('')+'</tr>':'<tr>'+cells.map(c=>`<td>${c.trim()}</td>`).join('')+'</tr>';
+    });
+    return t+'</table>';
+  });
+  h=h.replace(/```[\s\S]*?```/g,m=>`<pre>${m.replace(/```\w*\n?/,'').replace(/```$/,'')}</pre>`);
+  h=h.replace(/`(.+?)`/g,'<code>$1</code>');
+  h=h.replace(/🔴\s*URGENTE/g,'🔴 <span class="bu">Urgente</span>');
+  h=h.replace(/🟡\s*NORMAL/g,'🟡 <span class="bn">Normal</span>');
+  h=h.replace(/🔵\s*INFORMATIVO/g,'🔵 <span class="bi">Informativo</span>');
+  h=h.replace(/^[-*]\s+(.+)$/gm,'<li>$1</li>');
+  h=h.replace(/(<li>.*<\/li>\n?)+/g,m=>`<ul>${m}</ul>`);
+  h=h.replace(/\n\n/g,'</p><p>');
+  h='<p>'+h+'</p>';
+  ['h1','h2','h3','ul','table','pre'].forEach(t=>{
+    h=h.replace(new RegExp(`<p>(<${t}>)`,'g'),'$1');
+    h=h.replace(new RegExp(`(</${t}>)</p>`,'g'),'$1');
+  });
+  h=h.replace(/<p>\s*<\/p>/g,'');
+  return h;
+}
+
+// ── FALLBACK MM ───────────────────────────────────────────────────
+function buildFallbackMM(md){
+  const sections=[];const re=/^##\s+(.+)$/gm;let m;
+  while((m=re.exec(md))!==null)sections.push(m[1].replace(/\d+\.\s*/,''));
+  return{centro:'Reunión',ramas:sections.slice(0,6).map((s,i)=>({label:s,color:['#009CDE','#0066cc','#004a99','#00b4e6','#0088cc','#003d80'][i%6],hijos:[]}))};
+}
+
+// ── HISTORY ───────────────────────────────────────────────────────
+function saveHist(folio,name,ico,fecha,md,meta,mm){
+  let h=JSON.parse(localStorage.getItem('marelli_mtg')||'[]');
+  h.unshift({folio,name,ico,fecha,md,meta,mm,ts:Date.now()});
+  if(h.length>30)h=h.slice(0,30);
+  localStorage.setItem('marelli_mtg',JSON.stringify(h));
+  loadHist();
+}
+function loadHist(){
+  const h=JSON.parse(localStorage.getItem('marelli_mtg')||'[]');
+  const el=document.getElementById('histList');
+  if(!h.length){el.innerHTML='<div style="font-size:11px;color:var(--text3);padding:4px 14px;font-weight:300;">Sin registros aún</div>';return;}
+  el.innerHTML=h.slice(0,10).map(x=>`<div class="hist" onclick="viewHist('${x.folio}')"><span>${x.ico}</span><div><div class="hist-name">${x.name}</div><div class="hist-date">${x.fecha} · ${x.folio}</div></div></div>`).join('');
+}
+function viewHist(folio){
+  const h=JSON.parse(localStorage.getItem('marelli_mtg')||'[]');
+  const x=h.find(i=>i.folio===folio);if(!x)return;
+  lastMd=x.md;lastFolio=x.folio;lastMeta=x.meta||{};mmData=x.mm||null;
+  const t=T.find(t=>t.name===x.name)||T[0];
+  document.getElementById('resPanel').classList.remove('hidden');
+  document.getElementById('loadDiv').style.display='none';
+  document.getElementById('panel-minuta').style.display='flex';
+  document.getElementById('tab-minuta').classList.add('active');
+  document.getElementById('tab-mapa').classList.remove('active');
+  document.getElementById('rIcon').textContent=x.ico;
+  document.getElementById('rTitle').textContent=x.name;
+  document.getElementById('rFolio').textContent=x.folio+' · '+x.fecha;
+  renderMinuta(x.md,x.meta||{folio:x.folio,fecha:x.fecha,hora:'',lugar:'',dirigida:'',isCall:false},t);
+  setTimeout(()=>{mmFit();drawMM();},100);
+}
+
+// ── MIND MAP ──────────────────────────────────────────────────────
+function getCanvas(){return document.getElementById('mmCanvas');}
+function mmFit(){const c=getCanvas(),p=c.parentElement;c.width=p.clientWidth||800;mmScale=1;mmOffX=0;mmOffY=0;}
+function mmZoomIn(){mmScale=Math.min(mmScale*1.2,4);drawMM();}
+function mmZoomOut(){mmScale=Math.max(mmScale/1.2,0.25);drawMM();}
+function mmReset(){mmScale=1;mmOffX=0;mmOffY=0;drawMM();}
+
+const cv=document.getElementById('mmCanvas');
+cv.addEventListener('mousedown',e=>{mmDrag=true;mmDSX=e.clientX;mmDSY=e.clientY;mmDOX=mmOffX;mmDOY=mmOffY;});
+cv.addEventListener('mousemove',e=>{if(!mmDrag)return;mmOffX=mmDOX+(e.clientX-mmDSX);mmOffY=mmDOY+(e.clientY-mmDSY);drawMM();});
+cv.addEventListener('mouseup',()=>{mmDrag=false;});
+cv.addEventListener('mouseleave',()=>{mmDrag=false;});
+cv.addEventListener('wheel',e=>{e.preventDefault();mmScale=Math.min(4,Math.max(0.2,mmScale*(e.deltaY<0?1.1:0.9)));drawMM();},{passive:false});
+cv.addEventListener('touchstart',e=>{if(e.touches.length===1){mmDrag=true;mmDSX=e.touches[0].clientX;mmDSY=e.touches[0].clientY;mmDOX=mmOffX;mmDOY=mmOffY;}},{passive:true});
+cv.addEventListener('touchmove',e=>{if(mmDrag&&e.touches.length===1){mmOffX=mmDOX+(e.touches[0].clientX-mmDSX);mmOffY=mmDOY+(e.touches[0].clientY-mmDSY);drawMM();}},{passive:true});
+cv.addEventListener('touchend',()=>{mmDrag=false;});
+
+function drawMM(){
+  if(!mmData)return;
+  const canvas=getCanvas(),ctx=canvas.getContext('2d'),W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.save();
+  ctx.strokeStyle='rgba(0,40,85,0.035)';ctx.lineWidth=1;
+  for(let x=0;x<W;x+=24){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=24){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  ctx.restore();
+  ctx.save();
+  ctx.translate(W/2+mmOffX,H/2+mmOffY);
+  ctx.scale(mmScale,mmScale);
+  const ramas=mmData.ramas||[];const N=ramas.length;
+  const R1=140,R2=95,R3=75;
+  ramas.forEach((rama,i)=>{
+    const ang=(2*Math.PI/N)*i-Math.PI/2;
+    const bx=Math.cos(ang)*R1,by=Math.sin(ang)*R1;
+    const bc=rama.color||'#009CDE';
+    drawCurvedLine(ctx,0,0,bx,by,'rgba(0,40,85,0.2)',2.5);
+    drawNode(ctx,bx,by,rama.label,bc,'#fff',12,true);
+    (rama.hijos||[]).forEach((hijo,j)=>{
+      const nc=(rama.hijos||[]).length;
+      const sp=Math.min(0.9,0.28*nc);
+      const ca=ang+(j-(nc-1)/2)*sp;
+      const cx2=bx+Math.cos(ca)*R2,cy2=by+Math.sin(ca)*R2;
+      drawCurvedLine(ctx,bx,by,cx2,cy2,bc+'88',1.5);
+      drawNode(ctx,cx2,cy2,hijo.label,'#eef3f8',bc,11,false);
+      (hijo.hijos||[]).forEach((nieto,k)=>{
+        const ng=(hijo.hijos||[]).length;
+        const ga=ca+(k-(ng-1)/2)*Math.min(0.5,0.2*ng);
+        const gx=cx2+Math.cos(ga)*R3,gy=cy2+Math.sin(ga)*R3;
+        drawCurvedLine(ctx,cx2,cy2,gx,gy,'rgba(166,187,200,0.5)',1);
+        drawNode(ctx,gx,gy,nieto.label,'#f8fafc','#A6BBC8',10,false);
+      });
+    });
+  });
+  drawCenterNode(ctx,0,0,mmData.centro||'Reunión');
+  ctx.restore();
+}
+
+function drawCurvedLine(ctx,x1,y1,x2,y2,color,w){
+  ctx.save();ctx.strokeStyle=color;ctx.lineWidth=w;ctx.lineCap='round';
+  const mx=(x1+x2)/2,my=(y1+y2)/2,dx=x2-x1,dy=y2-y1;
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.quadraticCurveTo(mx-dy*.15,my+dx*.15,x2,y2);ctx.stroke();ctx.restore();
+}
+function drawCenterNode(ctx,x,y,label){
+  const r=50;ctx.save();
+  ctx.shadowColor='rgba(0,40,85,.2)';ctx.shadowBlur=16;ctx.shadowOffsetY=3;
+  ctx.fillStyle='#002855';ctx.beginPath();ctx.arc(x,y,r,0,2*Math.PI);ctx.fill();
+  ctx.shadowBlur=0;ctx.strokeStyle='#009CDE';ctx.lineWidth=3;
+  ctx.beginPath();ctx.arc(x,y,r+4,0,2*Math.PI);ctx.stroke();
+  ctx.fillStyle='#fff';ctx.font='bold 12px "Noto Sans",Arial,sans-serif';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  wrapText(ctx,label,x,y,r*1.6,14);ctx.restore();
+}
+function drawNode(ctx,x,y,label,bg,fg,fs,isBranch){
+  const lines=wrapTextLines(label,isBranch?9:8);const lh=fs+3;
+  const pw=Math.max(55,lines.reduce((m,l)=>Math.max(m,l.length*fs*.58),0)+18);
+  const ph=lines.length*lh+12;const rx=isBranch?9:7;
+  ctx.save();
+  if(isBranch){ctx.shadowColor='rgba(0,40,85,.15)';ctx.shadowBlur=8;ctx.shadowOffsetY=2;}
+  ctx.fillStyle=bg;roundRect(ctx,x-pw/2,y-ph/2,pw,ph,rx);ctx.fill();
+  ctx.shadowBlur=0;ctx.strokeStyle=fg;ctx.lineWidth=isBranch?2:1.2;
+  roundRect(ctx,x-pw/2,y-ph/2,pw,ph,rx);ctx.stroke();ctx.restore();
+  ctx.save();ctx.fillStyle=fg;
+  ctx.font=`${isBranch?'600':'400'} ${fs}px "Noto Sans",Arial,sans-serif`;
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  const sy=y-(lines.length-1)*lh/2;
+  lines.forEach((l,i)=>ctx.fillText(l,x,sy+i*lh));ctx.restore();
+}
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);
+  ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();
+}
+function wrapText(ctx,text,x,y,maxW,lh){
+  const words=text.split(' ');let line='';const lines=[];
+  words.forEach(w=>{const t=line?line+' '+w:w;if(ctx.measureText(t).width>maxW&&line){lines.push(line);line=w;}else line=t;});
+  if(line)lines.push(line);
+  const sy=y-(lines.length-1)*lh/2;lines.forEach((l,i)=>ctx.fillText(l,x,sy+i*lh));
+}
+function wrapTextLines(text,maxChars){
+  if(text.length<=maxChars)return[text];
+  const words=text.split(' ');const lines=[];let cur='';
+  words.forEach(w=>{if((cur+' '+w).trim().length<=maxChars)cur=(cur+' '+w).trim();else{if(cur)lines.push(cur);cur=w;}});
+  if(cur)lines.push(cur);
+  return lines.length?lines:[text.slice(0,maxChars)];
+}
+
+// ── EXPORT ────────────────────────────────────────────────────────
+function expHTML(){
+  const doc=document.getElementById('minutaDoc').innerHTML;
+  const css=`@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;600;700&display=swap');body{font-family:'Noto Sans',Arial,sans-serif;background:#f4f7fa;margin:32px;}.minuta{background:#fff;max-width:800px;margin:0 auto;border:1px solid #dde3ea;}.m-head{background:#002855;padding:20px 24px;display:flex;justify-content:space-between;gap:12px;}.m-doc-type{color:#A6BBC8;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-bottom:3px;}.m-doc-title{color:#fff;font-size:16px;font-weight:700;}.m-company{color:#A6BBC8;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-bottom:3px;}.m-folio{color:#fff;font-size:11px;font-weight:600;}.m-datetime{color:#A6BBC8;font-size:10px;margin-top:2px;}.m-head-right{text-align:right;}.m-accent{background:#009CDE;height:3px;}.m-strip{background:#eef3f8;border-bottom:1px solid #dde3ea;padding:10px 24px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}.ms-item label{font-size:8px;font-weight:700;color:#8fa3b3;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:2px;}.ms-item span{font-size:11px;font-weight:600;color:#002855;}.m-body{padding:20px 24px;font-size:13px;line-height:1.75;color:#2c3e50;}.m-body h2{font-size:10px;font-weight:700;color:#009CDE;text-transform:uppercase;letter-spacing:1.2px;margin:20px 0 8px;padding-bottom:5px;border-bottom:2px solid #009CDE;}.m-body h3{font-size:12px;font-weight:700;color:#002855;margin:12px 0 5px;}.m-body p{margin-bottom:8px;color:#3d4f5f;}.m-body ul{padding-left:16px;margin-bottom:10px;}.m-body li{margin-bottom:4px;color:#3d4f5f;}.m-body strong{color:#002855;font-weight:600;}.m-body table{width:100%;border-collapse:collapse;margin:8px 0 16px;font-size:11px;}.m-body th{background:#002855;color:#fff;font-size:9px;font-weight:700;text-transform:uppercase;padding:7px 8px;text-align:left;}.m-body td{padding:7px 8px;border-bottom:1px solid #dde3ea;color:#3d4f5f;}.m-body tr:nth-child(even) td{background:#f7fafc;}.m-foot{background:#eef3f8;border-top:1px solid #dde3ea;padding:14px 24px;display:flex;justify-content:space-between;align-items:flex-end;}.m-sign-line{width:100px;height:1px;background:#002855;margin-bottom:4px;}.m-sign-role{font-size:8px;font-weight:700;color:#8fa3b3;text-transform:uppercase;letter-spacing:1px;}.m-sign-name{font-size:11px;font-weight:600;color:#002855;}.m-foot-right{text-align:right;font-size:10px;color:#8fa3b3;}.conf-tag{display:inline-block;background:#002855;color:#fff;font-size:8px;font-weight:700;text-transform:uppercase;padding:2px 6px;margin-top:3px;}.call-type-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(0,156,222,.1);color:#002855;border:1px solid rgba(0,156,222,.25);border-radius:4px;padding:3px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}.bu{background:rgba(255,50,50,.08);color:#aa1122;border:1px solid rgba(255,50,50,.2);border-radius:3px;padding:1px 6px;font-size:10px;font-weight:700;}.bn{background:rgba(180,130,0,.08);color:#886600;border:1px solid rgba(180,130,0,.2);border-radius:3px;padding:1px 6px;font-size:10px;font-weight:700;}.bi{background:rgba(0,156,222,.08);color:#002855;border:1px solid rgba(0,156,222,.2);border-radius:3px;padding:1px 6px;font-size:10px;font-weight:700;}`;
+  const full=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>${lastFolio}</title><style>${css}</style></head><body><div class="minuta">${doc}</div></body></html>`;
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([full],{type:'text/html;charset=utf-8'}));a.download=`${lastFolio}.html`;a.click();
+}
+function expMd(){
+  if(!lastMd)return;
+  const m=lastMeta;
+  const hdr=`---\nFolio: ${m.folio}\nFecha: ${m.fecha} ${m.hora}\n${m.isCall?`Quién llamó: ${m.callWho||'N/A'}\nDuración: ${m.callDur||'N/A'}`:`Lugar: ${m.lugar}\nDirigida a: ${m.dirigida}`}\nResponsable: Gerente de Logística\nClasificación: Confidencial Interno\n---\n\n`;
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([hdr+lastMd],{type:'text/markdown;charset=utf-8'}));a.download=`${lastFolio}.md`;a.click();
+}
+function doPrint(){window.print();}
+function closeRes(){document.getElementById('resPanel').classList.add('hidden');}
+</script>
+</body>
+</html>
