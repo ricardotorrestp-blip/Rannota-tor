@@ -293,6 +293,8 @@ textarea::placeholder{color:var(--text3);font-weight:300;}
 .nt-ai-task{font-size:12px;font-weight:600;color:var(--text);flex:1;min-width:160px;}
 .nt-ai-meta{font-size:10px;color:var(--text3);font-weight:300;white-space:nowrap;}
 .nt-help{font-size:11px;color:var(--text3);font-weight:300;line-height:1.6;background:var(--light);border-left:3px solid var(--p2925);border-radius:3px;padding:8px 10px;margin-top:10px;}
+.nt-help.nt-warn{background:rgba(204,34,51,.06);border-left-color:var(--urgent);color:var(--text2);}
+.nt-help.hidden{display:none!important;}
 .nt-livedot{display:none;color:#ff6677;margin-left:4px;animation:ntpulse 1.2s infinite;}
 </style>
 </head>
@@ -383,6 +385,7 @@ textarea::placeholder{color:var(--text3);font-weight:300;}
           <button class="nt-btn danger hidden" id="ntStopBtn" onclick="ntStopCapture()">■ Detener y generar minuta</button>
         </div>
         <div class="nt-help">Al iniciar, el navegador te pedirá elegir la <strong>pestaña o ventana</strong> de tu reunión (Zoom/Meet/Teams en el navegador) y activar <strong>"Compartir audio"</strong>. El audio se transcribe en chunks de ~5s sin salir de esta pestaña — nada se instala en tu equipo.</div>
+        <div class="nt-help nt-warn hidden" id="ntOverlapNote"></div>
         <div class="zone-lbl" style="margin-top:10px;">Transcripción en vivo</div>
         <div class="nt-transcript" id="ntTranscript"></div>
       </div>
@@ -1200,7 +1203,8 @@ const NT_SCHEMA_PROMPT=`Eres un asistente que genera actas de reuniones a partir
 Si algún campo no tiene información, devuélvelo como arreglo u objeto vacío, nunca omitas la llave.`;
 
 let ntState={
-  gcalToken:null,events:[],activeEvent:null,bannerDismissedFor:null,
+  gcalToken:null,events:[],activeEvent:null,
+  dismissedIds:new Set(),notifiedOverlapIds:new Set(),
   stream:null,recorder:null,recognition:null,recording:false,
   timerInt:null,startTs:0,transcript:'',lastResult:null
 };
@@ -1282,7 +1286,7 @@ async function ntFetchEvents(){
       const end=ev.end.dateTime||ev.end.date;
       const blob=[ev.hangoutLink,ev.location,ev.description].filter(Boolean).join(' ');
       const m=blob.match(MEETING_RE);
-      return{title:ev.summary||'(Sin título)',start:new Date(start),end:new Date(end),meetingUrl:ev.hangoutLink||(m?m[0]:null)};
+      return{id:ev.id,title:ev.summary||'(Sin título)',start:new Date(start),end:new Date(end),meetingUrl:ev.hangoutLink||(m?m[0]:null)};
     });
     ntRenderEvents();
   }catch(e){
@@ -1308,27 +1312,54 @@ function ntRenderEvents(){
 }
 
 // ── ORCHESTRATOR ──────────────────────────────────────────────────
-// Compara la hora actual contra los eventos del calendario con enlace de
-// videollamada y, si hay coincidencia, muestra el banner "Reunión detectada".
+// Compara la hora actual contra TODOS los eventos del calendario con enlace
+// de videollamada (puede haber varios traslapados a la vez) y, si hay
+// coincidencia, muestra el banner "Reunión detectada".
 function ntCheckActiveMeeting(){
   const now=new Date();
-  const active=ntState.events.find(e=>now>=e.start&&now<=e.end&&e.meetingUrl);
   const banner=document.getElementById('ntBanner');
   const liveDot=document.getElementById('ntLiveDot');
-  if(active&&!ntState.recording&&ntState.bannerDismissedFor!==active.title){
-    ntState.activeEvent=active;
-    document.getElementById('ntBannerTitle').textContent=`Reunión detectada: ${active.title}`;
-    document.getElementById('ntBannerSub').textContent=`En curso ahora · ${active.meetingUrl}`;
+  const overlapNote=document.getElementById('ntOverlapNote');
+
+  // limpia descartes de eventos que ya terminaron
+  ntState.dismissedIds.forEach(id=>{
+    const ev=ntState.events.find(e=>e.id===id);
+    if(!ev||now>ev.end)ntState.dismissedIds.delete(id);
+  });
+
+  const activeEvents=ntState.events.filter(e=>now>=e.start&&now<=e.end&&e.meetingUrl);
+
+  if(ntState.recording){
+    // No interrumpe la grabación en curso: solo avisa si OTRA reunión
+    // calendarizada distinta a la que se está grabando también está activa.
+    const other=activeEvents.find(e=>!ntState.activeEvent||e.id!==ntState.activeEvent.id);
+    if(other&&!ntState.notifiedOverlapIds.has(other.id)){
+      overlapNote.textContent=`⚠️ Otra reunión inició mientras grabas: "${other.title}". El navegador solo puede capturar una pestaña a la vez — si necesitas notas de ambas, detén esta grabación y vuelve a "Iniciar captura" eligiendo la otra pestaña.`;
+      overlapNote.classList.remove('hidden');
+      ntState.notifiedOverlapIds.add(other.id);
+    }
+    liveDot.style.display='none';
+    return;
+  }
+
+  // De las reuniones activas no descartadas, sugiere la que inició más
+  // recientemente (la más probable que el usuario acaba de unirse).
+  const candidate=activeEvents.filter(e=>!ntState.dismissedIds.has(e.id)).sort((a,b)=>b.start-a.start)[0];
+
+  if(candidate){
+    ntState.activeEvent=candidate;
+    document.getElementById('ntBannerTitle').textContent=`Reunión detectada: ${candidate.title}`;
+    document.getElementById('ntBannerSub').textContent=`En curso ahora · ${candidate.meetingUrl}`;
     banner.classList.remove('hidden');
-  }else if(!ntState.recording){
+  }else{
     banner.classList.add('hidden');
   }
-  liveDot.style.display=(active&&!ntState.recording)?'inline':'none';
+  liveDot.style.display=activeEvents.length?'inline':'none';
 }
 function ntDismissBanner(){
-  if(ntState.activeEvent)ntState.bannerDismissedFor=ntState.activeEvent.title;
+  if(ntState.activeEvent)ntState.dismissedIds.add(ntState.activeEvent.id);
   document.getElementById('ntBanner').classList.add('hidden');
-  document.getElementById('ntLiveDot').style.display='none';
+  ntCheckActiveMeeting(); // re-evalúa: puede haber otra reunión traslapada activa
 }
 
 // ── CAPTURE ENGINE ────────────────────────────────────────────────
@@ -1350,7 +1381,16 @@ async function ntStartCapture(){
     document.getElementById('ntTranscript').textContent='';
     document.getElementById('ntBanner').classList.add('hidden');
     document.getElementById('ntLiveDot').style.display='none';
+    document.getElementById('ntOverlapNote').classList.add('hidden');
     document.getElementById('ntResultsCard').classList.add('hidden');
+
+    // Si esta captura corresponde a una reunión calendarizada activa, la
+    // recordamos para poder distinguirla de otras reuniones traslapadas.
+    {
+      const now=new Date();
+      ntState.activeEvent=ntState.events.find(e=>now>=e.start&&now<=e.end&&e.meetingUrl)||null;
+      ntState.notifiedOverlapIds=new Set();
+    }
 
     const cfg=ntGetSettings();
     if(cfg.transMode==='webspeech'){
@@ -1391,7 +1431,11 @@ function ntStopCapture(){
   document.getElementById('ntRecStatus').textContent='Generando minuta...';
   document.getElementById('ntStartBtn').classList.remove('hidden');
   document.getElementById('ntStopBtn').classList.add('hidden');
+  document.getElementById('ntOverlapNote').classList.add('hidden');
+  if(ntState.activeEvent)ntState.dismissedIds.add(ntState.activeEvent.id);
+  ntState.activeEvent=null;
   setTimeout(ntFinishAndSummarize,1200); // espera a que llegue el último chunk
+  setTimeout(ntCheckActiveMeeting,1300); // re-evalúa por si hay otra reunión esperando
 }
 
 // ── TRANSCRIPTION ─────────────────────────────────────────────────
