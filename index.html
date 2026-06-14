@@ -237,6 +237,63 @@ textarea::placeholder{color:var(--text3);font-weight:300;}
 
 @media print{.res-header,.res-tabs{display:none!important;}.tab-panel{overflow:visible;}.minuta{border:none;box-shadow:none;}}
 ::-webkit-scrollbar{width:4px;height:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+/* ── NOTETAKER (Meeting Notetaker — Beta navegador) ── */
+.nt-overlay{position:fixed;inset:0;background:var(--light);z-index:160;display:flex;flex-direction:column;}
+.nt-overlay.hidden{display:none!important;}
+.nt-header{background:var(--p295);padding:0 16px;height:50px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:8px;}
+.nt-title{color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.nt-beta{background:var(--p2925);color:#fff;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:2px 6px;border-radius:2px;}
+.nt-accent{background:var(--p2925);height:3px;flex-shrink:0;}
+.nt-body{flex:1;overflow-y:auto;padding:20px 16px;display:flex;justify-content:center;}
+.nt-wrap{width:100%;max-width:760px;display:flex;flex-direction:column;gap:16px;padding-bottom:40px;}
+.nt-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;}
+.nt-card h3{font-size:11px;font-weight:700;color:var(--p295);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.nt-card h3 small{font-size:9px;color:var(--text3);text-transform:none;font-weight:300;letter-spacing:0;}
+.nt-grid{display:grid;grid-template-columns:1fr;gap:8px;}
+@media(min-width:600px){.nt-grid{grid-template-columns:1fr 1fr;}}
+.nt-field label{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:3px;}
+.nt-field input,.nt-field select{width:100%;background:var(--light);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;font-family:'Noto Sans',Arial,sans-serif;font-size:12px;color:var(--text);outline:none;}
+.nt-field input:focus,.nt-field select:focus{border-color:var(--p2925);}
+.nt-btnrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;}
+.nt-btn{background:var(--p295);color:#fff;border:none;border-radius:var(--radius);padding:8px 14px;font-size:11px;font-weight:700;font-family:'Noto Sans',Arial,sans-serif;cursor:pointer;transition:var(--t);text-transform:uppercase;letter-spacing:.6px;}
+.nt-btn:hover{background:var(--p2925);}
+.nt-btn:disabled{opacity:.4;cursor:not-allowed;}
+.nt-btn.ghost{background:transparent;color:var(--p295);border:1px solid var(--border);}
+.nt-btn.ghost:hover{border-color:var(--p2925);}
+.nt-btn.danger{background:var(--urgent);}
+.nt-btn.danger:hover{background:#aa1122;}
+.nt-btn.hidden{display:none!important;}
+.nt-status{font-size:11px;color:var(--text3);font-weight:300;}
+.nt-status.ok{color:#0a8a4a;font-weight:600;}
+.nt-cal-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;background:var(--light);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px;}
+.nt-cal-item:last-child{margin-bottom:0;}
+.nt-cal-time{font-size:10px;color:var(--text3);font-weight:600;min-width:64px;}
+.nt-cal-name{font-size:12px;color:var(--text);font-weight:600;flex:1;}
+.nt-cal-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 7px;border-radius:10px;white-space:nowrap;}
+.nt-cal-tag.live{background:rgba(204,34,51,.1);color:var(--urgent);border:1px solid rgba(204,34,51,.2);}
+.nt-cal-tag.soon{background:rgba(0,156,222,.1);color:var(--p295);border:1px solid rgba(0,156,222,.2);}
+.nt-banner{background:rgba(0,156,222,.08);border:1px solid rgba(0,156,222,.25);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.nt-banner.hidden{display:none!important;}
+.nt-banner-txt{font-size:12px;color:var(--p295);font-weight:600;}
+.nt-banner-sub{font-size:11px;color:var(--text2);font-weight:300;margin-top:2px;}
+.nt-rec{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+.nt-rec-dot{width:10px;height:10px;border-radius:50%;background:var(--urgent);animation:ntpulse 1.2s infinite;}
+.nt-rec.idle .nt-rec-dot{background:var(--border);animation:none;}
+@keyframes ntpulse{0%,100%{opacity:1;}50%{opacity:.25;}}
+.nt-timer{font-size:13px;font-weight:700;color:var(--p295);font-family:monospace;}
+.nt-transcript{width:100%;min-height:120px;max-height:240px;overflow-y:auto;background:var(--light);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;font-size:12px;line-height:1.6;color:var(--text2);white-space:pre-wrap;outline:none;}
+.nt-transcript:empty::before{content:'La transcripción en vivo aparecerá aquí...';color:var(--text3);font-style:italic;}
+.nt-tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:10px;overflow-x:auto;}
+.nt-tab{background:transparent;border:none;border-bottom:2px solid transparent;padding:8px 12px;font-family:'Noto Sans',Arial,sans-serif;font-size:11px;font-weight:700;color:var(--text3);cursor:pointer;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+.nt-tab.active{color:var(--p295);border-bottom-color:var(--p2925);}
+.nt-tabpanel{display:none;font-size:12px;line-height:1.7;color:var(--text2);}
+.nt-tabpanel.active{display:block;}
+.nt-ai-item{background:var(--light);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;margin-bottom:6px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.nt-ai-task{font-size:12px;font-weight:600;color:var(--text);flex:1;min-width:160px;}
+.nt-ai-meta{font-size:10px;color:var(--text3);font-weight:300;white-space:nowrap;}
+.nt-help{font-size:11px;color:var(--text3);font-weight:300;line-height:1.6;background:var(--light);border-left:3px solid var(--p2925);border-radius:3px;padding:8px 10px;margin-top:10px;}
+.nt-livedot{display:none;color:#ff6677;margin-left:4px;animation:ntpulse 1.2s infinite;}
 </style>
 </head>
 <body>
@@ -281,6 +338,96 @@ textarea::placeholder{color:var(--text3);font-weight:300;}
   </div>
 </div>
 
+<!-- NOTETAKER (Meeting Notetaker — Beta navegador) -->
+<div class="nt-overlay hidden" id="ntOverlay">
+  <div class="nt-header">
+    <div class="nt-title">🎙️ Meeting Notetaker <span class="nt-beta">Beta · 100% navegador</span></div>
+    <button class="btn-bk" onclick="closeNotetaker()">← Volver</button>
+  </div>
+  <div class="nt-accent"></div>
+  <div class="nt-body">
+    <div class="nt-wrap">
+
+      <!-- DETECCIÓN -->
+      <div class="nt-banner hidden" id="ntBanner">
+        <div>
+          <div class="nt-banner-txt" id="ntBannerTitle">Reunión detectada</div>
+          <div class="nt-banner-sub" id="ntBannerSub">—</div>
+        </div>
+        <div class="nt-btnrow" style="margin-top:0;">
+          <button class="nt-btn" onclick="ntStartCapture()">▶ Iniciar notas</button>
+          <button class="nt-btn ghost" onclick="ntDismissBanner()">Ignorar</button>
+        </div>
+      </div>
+
+      <!-- CALENDARIO -->
+      <div class="nt-card">
+        <h3>📅 Calendario <small id="ntCalStatus">No conectado</small></h3>
+        <div id="ntCalList"><div class="nt-status">Conecta tu Google Calendar para detectar reuniones de hoy automáticamente (busca enlaces de Zoom / Meet / Teams / Webex).</div></div>
+        <div class="nt-btnrow">
+          <button class="nt-btn" id="ntCalBtn" onclick="ntConnectCalendar()">Conectar Google Calendar</button>
+          <button class="nt-btn ghost" onclick="ntRefreshEvents()">↻ Actualizar eventos</button>
+        </div>
+      </div>
+
+      <!-- CAPTURA -->
+      <div class="nt-card">
+        <h3>🎙️ Captura y transcripción <small>audio de la pestaña/ventana de tu reunión</small></h3>
+        <div class="nt-rec idle" id="ntRecRow">
+          <div class="nt-rec-dot"></div>
+          <div class="nt-timer" id="ntTimer">00:00</div>
+          <div class="nt-status" id="ntRecStatus">Sin grabar</div>
+        </div>
+        <div class="nt-btnrow">
+          <button class="nt-btn" id="ntStartBtn" onclick="ntStartCapture()">▶ Iniciar captura</button>
+          <button class="nt-btn danger hidden" id="ntStopBtn" onclick="ntStopCapture()">■ Detener y generar minuta</button>
+        </div>
+        <div class="nt-help">Al iniciar, el navegador te pedirá elegir la <strong>pestaña o ventana</strong> de tu reunión (Zoom/Meet/Teams en el navegador) y activar <strong>"Compartir audio"</strong>. El audio se transcribe en chunks de ~5s sin salir de esta pestaña — nada se instala en tu equipo.</div>
+        <div class="zone-lbl" style="margin-top:10px;">Transcripción en vivo</div>
+        <div class="nt-transcript" id="ntTranscript"></div>
+      </div>
+
+      <!-- CONFIGURACIÓN -->
+      <div class="nt-card">
+        <h3>⚙️ Configuración del Notetaker</h3>
+        <div class="nt-grid">
+          <div class="nt-field"><label>Google Client ID (Calendar)</label><input type="text" id="ntGcalId" placeholder="xxxx.apps.googleusercontent.com"/></div>
+          <div class="nt-field"><label>OpenAI API Key (Whisper)</label><input type="password" id="ntOpenAIKey" placeholder="sk-..."/></div>
+          <div class="nt-field"><label>Transcripción</label><select id="ntTransMode"><option value="whisper">OpenAI Whisper API</option><option value="webspeech">Web Speech API (micrófono)</option></select></div>
+          <div class="nt-field"><label>Resumen (Summarizer)</label><select id="ntSumMode"><option value="claude">Claude API (usa la API Key del header)</option><option value="ollama">Ollama local (llama3.1:8b)</option></select></div>
+          <div class="nt-field"><label>Notion Integration Token</label><input type="password" id="ntNotionToken" placeholder="secret_..."/></div>
+          <div class="nt-field"><label>Notion Database ID</label><input type="text" id="ntNotionDb" placeholder="ID de la base 'Meeting Notes'"/></div>
+        </div>
+        <div class="nt-btnrow"><button class="nt-btn" onclick="ntSaveSettings()">Guardar configuración</button><span class="nt-status" id="ntSettingsStatus"></span></div>
+        <div class="nt-help">Todo se guarda solo en este navegador (localStorage), igual que tu API Key de Anthropic. Nada se envía a servidores de Marelli/Rannota-tor.</div>
+      </div>
+
+      <!-- RESULTADOS -->
+      <div class="nt-card hidden" id="ntResultsCard">
+        <h3>📄 Minuta generada</h3>
+        <div class="nt-tabs">
+          <button class="nt-tab active" onclick="ntSwitchTab('resumen')">Resumen</button>
+          <button class="nt-tab" onclick="ntSwitchTab('transcripcion')">Transcripción</button>
+          <button class="nt-tab" onclick="ntSwitchTab('action')">Action Items</button>
+          <button class="nt-tab" onclick="ntSwitchTab('decisiones')">Decisiones</button>
+          <button class="nt-tab" onclick="ntSwitchTab('participantes')">Participantes</button>
+        </div>
+        <div class="nt-tabpanel active" id="nt-panel-resumen"></div>
+        <div class="nt-tabpanel" id="nt-panel-transcripcion"></div>
+        <div class="nt-tabpanel" id="nt-panel-action"></div>
+        <div class="nt-tabpanel" id="nt-panel-decisiones"></div>
+        <div class="nt-tabpanel" id="nt-panel-participantes"></div>
+        <div class="nt-btnrow">
+          <button class="nt-btn" onclick="ntSyncNotion()">⇪ Enviar a Notion</button>
+          <button class="nt-btn ghost" onclick="ntCopyMarkdown()">⧉ Copiar Markdown</button>
+        </div>
+        <div class="nt-status" id="ntNotionStatus"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <!-- HEADER -->
 <div class="header">
   <div style="display:flex;align-items:center;min-width:0;">
@@ -289,6 +436,7 @@ textarea::placeholder{color:var(--text3);font-weight:300;}
     <div class="hmid">Logística · Aduanas · Supply Chain</div>
   </div>
   <div class="hright">
+    <button class="api-btn" id="ntLaunchBtn" onclick="openNotetaker()">🎙️ Notetaker<span class="nt-livedot" id="ntLiveDot">●</span></button>
     <button class="pending-btn" onclick="openPendientes()">🗂 Pendientes <span class="pending-count" id="pendingBadge">0</span></button>
     <button class="api-btn" id="apiBadge" onclick="openModal()">API Key</button>
   </div>
@@ -559,6 +707,7 @@ window.onload=()=>{
   }
   checkKey();loadHist();updatePendingBadge();
   window.addEventListener('resize',()=>{if(mmData)drawMM();});
+  setInterval(ntCheckActiveMeeting,60000);
 };
 
 // ── API KEY ───────────────────────────────────────────────────────
@@ -1027,6 +1176,407 @@ function expMd(){
 }
 function doPrint(){window.print();}
 function closeRes(){document.getElementById('resPanel').classList.add('hidden');}
+
+// ════════════════════════════════════════════════════════════════════
+// ── MEETING NOTETAKER (Beta · 100% navegador) ─────────────────────────
+// Adaptación a navegador del SPEC "AI Meeting Notetaker – Desktop MVP":
+//  - calendar-sync   → Google Calendar API (OAuth vía Google Identity Services)
+//  - audio-watcher / capture-engine → getDisplayMedia (audio de pestaña/ventana)
+//  - orchestrator    → ntCheckActiveMeeting() compara hora actual vs eventos
+//  - transcription   → OpenAI Whisper API (chunks 5s) o Web Speech API
+//  - summarizer      → Claude API (misma key) u Ollama local, JSON Schema fijo
+//  - notion-sync     → Notion API (con fallback a copiar Markdown por CORS)
+// ════════════════════════════════════════════════════════════════════
+
+const NT_SCHEMA_PROMPT=`Eres un asistente que genera actas de reuniones a partir de una transcripción. Responde ÚNICAMENTE con un JSON válido (sin texto adicional, sin bloques de código markdown), con esta forma exacta:
+{
+  "titulo": "string - título breve de la reunión",
+  "resumen": "string - resumen ejecutivo de 2 a 4 párrafos",
+  "transcripcion": "string - transcripción limpia, con puntuación",
+  "decisiones": ["string", "..."],
+  "action_items": [{"tarea":"string","responsable":"string","fecha_limite":"string","prioridad":"alta|media|baja"}],
+  "participantes": ["string", "..."]
+}
+Si algún campo no tiene información, devuélvelo como arreglo u objeto vacío, nunca omitas la llave.`;
+
+let ntState={
+  gcalToken:null,events:[],activeEvent:null,bannerDismissedFor:null,
+  stream:null,recorder:null,recognition:null,recording:false,
+  timerInt:null,startTs:0,transcript:'',lastResult:null
+};
+
+// ── SETTINGS ──────────────────────────────────────────────────────
+function ntGetSettings(){return JSON.parse(localStorage.getItem('nt_settings')||'{}');}
+function ntLoadSettings(){
+  const s=ntGetSettings();
+  document.getElementById('ntGcalId').value=s.gcalId||'';
+  document.getElementById('ntOpenAIKey').value=s.openaiKey||'';
+  document.getElementById('ntTransMode').value=s.transMode||'whisper';
+  document.getElementById('ntSumMode').value=s.sumMode||'claude';
+  document.getElementById('ntNotionToken').value=s.notionToken||'';
+  document.getElementById('ntNotionDb').value=s.notionDb||'';
+}
+function ntSaveSettings(){
+  const s={
+    gcalId:document.getElementById('ntGcalId').value.trim(),
+    openaiKey:document.getElementById('ntOpenAIKey').value.trim(),
+    transMode:document.getElementById('ntTransMode').value,
+    sumMode:document.getElementById('ntSumMode').value,
+    notionToken:document.getElementById('ntNotionToken').value.trim(),
+    notionDb:document.getElementById('ntNotionDb').value.trim()
+  };
+  localStorage.setItem('nt_settings',JSON.stringify(s));
+  const st=document.getElementById('ntSettingsStatus');
+  st.textContent='✓ Guardado';st.className='nt-status ok';
+  setTimeout(()=>{st.textContent='';st.className='nt-status';},2000);
+}
+
+// ── OVERLAY ───────────────────────────────────────────────────────
+function openNotetaker(){
+  document.getElementById('ntOverlay').classList.remove('hidden');
+  ntLoadSettings();
+  ntCheckActiveMeeting();
+}
+function closeNotetaker(){document.getElementById('ntOverlay').classList.add('hidden');}
+
+// ── CALENDAR SYNC (Google Calendar) ───────────────────────────────
+function ntLoadGIS(cb){
+  if(window.google&&window.google.accounts){cb();return;}
+  const s=document.createElement('script');
+  s.src='https://accounts.google.com/gsi/client';
+  s.async=true;s.onload=cb;
+  s.onerror=()=>alert('No se pudo cargar Google Identity Services. Verifica tu conexión.');
+  document.head.appendChild(s);
+}
+function ntConnectCalendar(){
+  const cfg=ntGetSettings();
+  if(!cfg.gcalId){alert('Configura tu Google Client ID (sección Configuración) antes de conectar tu calendario.');return;}
+  ntLoadGIS(()=>{
+    const tokenClient=google.accounts.oauth2.initTokenClient({
+      client_id:cfg.gcalId,
+      scope:'https://www.googleapis.com/auth/calendar.readonly',
+      callback:(resp)=>{
+        if(resp.error){alert('Error de autenticación con Google: '+resp.error);return;}
+        ntState.gcalToken=resp.access_token;
+        document.getElementById('ntCalStatus').textContent='✓ Conectado';
+        document.getElementById('ntCalBtn').textContent='Reconectar';
+        ntFetchEvents();
+      }
+    });
+    tokenClient.requestAccessToken();
+  });
+}
+async function ntFetchEvents(){
+  if(!ntState.gcalToken)return;
+  const now=new Date();
+  const timeMin=new Date(now);timeMin.setHours(0,0,0,0);
+  const timeMax=new Date(now);timeMax.setHours(23,59,59,999);
+  const url=`https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${encodeURIComponent(timeMin.toISOString())}&timeMax=${encodeURIComponent(timeMax.toISOString())}&singleEvents=true&orderBy=startTime`;
+  try{
+    const r=await fetch(url,{headers:{Authorization:`Bearer ${ntState.gcalToken}`}});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    const MEETING_RE=/https?:\/\/(?:[\w.-]*\.)?(zoom\.us|meet\.google\.com|teams\.microsoft\.com|webex\.com)[^\s"<>]*/i;
+    ntState.events=(d.items||[]).filter(ev=>ev.start&&ev.end).map(ev=>{
+      const start=ev.start.dateTime||ev.start.date;
+      const end=ev.end.dateTime||ev.end.date;
+      const blob=[ev.hangoutLink,ev.location,ev.description].filter(Boolean).join(' ');
+      const m=blob.match(MEETING_RE);
+      return{title:ev.summary||'(Sin título)',start:new Date(start),end:new Date(end),meetingUrl:ev.hangoutLink||(m?m[0]:null)};
+    });
+    ntRenderEvents();
+  }catch(e){
+    document.getElementById('ntCalList').innerHTML=`<div class="nt-status" style="color:var(--urgent);">Error al cargar eventos: ${e.message}</div>`;
+  }
+}
+function ntRefreshEvents(){
+  if(!ntState.gcalToken){alert('Conecta primero tu Google Calendar.');return;}
+  ntFetchEvents();
+}
+function ntRenderEvents(){
+  const el=document.getElementById('ntCalList');
+  if(!ntState.events.length){el.innerHTML='<div class="nt-status">Sin eventos para hoy.</div>';return;}
+  const now=new Date();
+  el.innerHTML=ntState.events.map(e=>{
+    const live=now>=e.start&&now<=e.end;
+    const soon=!live&&e.start>now&&(e.start-now)<15*60*1000;
+    const tag=live?'<span class="nt-cal-tag live">🔴 En curso</span>':soon?'<span class="nt-cal-tag soon">Pronto</span>':'';
+    const time=e.start.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+    return `<div class="nt-cal-item"><span class="nt-cal-time">${time}</span><span class="nt-cal-name">${e.title}${e.meetingUrl?' 🔗':''}</span>${tag}</div>`;
+  }).join('');
+  ntCheckActiveMeeting();
+}
+
+// ── ORCHESTRATOR ──────────────────────────────────────────────────
+// Compara la hora actual contra los eventos del calendario con enlace de
+// videollamada y, si hay coincidencia, muestra el banner "Reunión detectada".
+function ntCheckActiveMeeting(){
+  const now=new Date();
+  const active=ntState.events.find(e=>now>=e.start&&now<=e.end&&e.meetingUrl);
+  const banner=document.getElementById('ntBanner');
+  const liveDot=document.getElementById('ntLiveDot');
+  if(active&&!ntState.recording&&ntState.bannerDismissedFor!==active.title){
+    ntState.activeEvent=active;
+    document.getElementById('ntBannerTitle').textContent=`Reunión detectada: ${active.title}`;
+    document.getElementById('ntBannerSub').textContent=`En curso ahora · ${active.meetingUrl}`;
+    banner.classList.remove('hidden');
+  }else if(!ntState.recording){
+    banner.classList.add('hidden');
+  }
+  liveDot.style.display=(active&&!ntState.recording)?'inline':'none';
+}
+function ntDismissBanner(){
+  if(ntState.activeEvent)ntState.bannerDismissedFor=ntState.activeEvent.title;
+  document.getElementById('ntBanner').classList.add('hidden');
+  document.getElementById('ntLiveDot').style.display='none';
+}
+
+// ── CAPTURE ENGINE ────────────────────────────────────────────────
+async function ntStartCapture(){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getDisplayMedia){
+    alert('Tu navegador no soporta captura de pantalla/audio (getDisplayMedia). Usa Chrome o Edge actualizados.');
+    return;
+  }
+  try{
+    const stream=await navigator.mediaDevices.getDisplayMedia({video:true,audio:true});
+    const audioTracks=stream.getAudioTracks();
+    if(!audioTracks.length){
+      stream.getTracks().forEach(t=>t.stop());
+      alert('No se compartió audio. Vuelve a intentar y activa la opción "Compartir audio de la pestaña/sistema" en el diálogo del navegador.');
+      return;
+    }
+    ntState.stream=stream;
+    ntState.transcript='';
+    document.getElementById('ntTranscript').textContent='';
+    document.getElementById('ntBanner').classList.add('hidden');
+    document.getElementById('ntLiveDot').style.display='none';
+    document.getElementById('ntResultsCard').classList.add('hidden');
+
+    const cfg=ntGetSettings();
+    if(cfg.transMode==='webspeech'){
+      ntStartSpeechRecognition();
+    }else{
+      const audioOnly=new MediaStream(audioTracks);
+      const mime=window.MediaRecorder&&MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm';
+      ntState.recorder=new MediaRecorder(audioOnly,{mimeType:mime});
+      ntState.recorder.ondataavailable=e=>{if(e.data&&e.data.size>0)ntTranscribeChunk(e.data);};
+      ntState.recorder.start(5000); // chunks de 5s, como en el spec
+    }
+
+    ntState.recording=true;
+    ntState.startTs=Date.now();
+    document.getElementById('ntRecRow').classList.remove('idle');
+    document.getElementById('ntRecStatus').textContent='Grabando...';
+    document.getElementById('ntStartBtn').classList.add('hidden');
+    document.getElementById('ntStopBtn').classList.remove('hidden');
+    ntState.timerInt=setInterval(ntUpdateTimer,1000);
+    audioTracks[0].addEventListener('ended',()=>{if(ntState.recording)ntStopCapture();});
+  }catch(e){
+    if(e.name!=='NotAllowedError')alert('No se pudo iniciar la captura: '+e.message);
+  }
+}
+function ntUpdateTimer(){
+  const s=Math.floor((Date.now()-ntState.startTs)/1000);
+  const m=String(Math.floor(s/60)).padStart(2,'0'),sec=String(s%60).padStart(2,'0');
+  document.getElementById('ntTimer').textContent=`${m}:${sec}`;
+}
+function ntStopCapture(){
+  if(!ntState.recording)return;
+  ntState.recording=false;
+  clearInterval(ntState.timerInt);
+  if(ntState.recorder&&ntState.recorder.state!=='inactive')ntState.recorder.stop();
+  if(ntState.recognition){ntState.recognition.onend=null;try{ntState.recognition.stop();}catch(e){}ntState.recognition=null;}
+  if(ntState.stream){ntState.stream.getTracks().forEach(t=>t.stop());ntState.stream=null;}
+  document.getElementById('ntRecRow').classList.add('idle');
+  document.getElementById('ntRecStatus').textContent='Generando minuta...';
+  document.getElementById('ntStartBtn').classList.remove('hidden');
+  document.getElementById('ntStopBtn').classList.add('hidden');
+  setTimeout(ntFinishAndSummarize,1200); // espera a que llegue el último chunk
+}
+
+// ── TRANSCRIPTION ─────────────────────────────────────────────────
+async function ntTranscribeChunk(blob){
+  const cfg=ntGetSettings();
+  if(!cfg.openaiKey){
+    ntAppendTranscript('[Configura tu OpenAI API Key en Configuración para transcripción con Whisper]');
+    return;
+  }
+  try{
+    const fd=new FormData();
+    fd.append('file',blob,'chunk.webm');
+    fd.append('model','whisper-1');
+    const r=await fetch('https://api.openai.com/v1/audio/transcriptions',{
+      method:'POST',headers:{Authorization:`Bearer ${cfg.openaiKey}`},body:fd
+    });
+    if(!r.ok)return;
+    const d=await r.json();
+    if(d.text&&d.text.trim())ntAppendTranscript(d.text.trim());
+  }catch(e){/* chunk perdido, continúa con el siguiente */}
+}
+function ntStartSpeechRecognition(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){ntAppendTranscript('[Web Speech API no disponible en este navegador — usa Chrome o cambia a Whisper API]');return;}
+  const rec=new SR();
+  rec.lang='es-MX';rec.continuous=true;rec.interimResults=false;
+  rec.onresult=(ev)=>{
+    for(let i=ev.resultIndex;i<ev.results.length;i++){
+      if(ev.results[i].isFinal)ntAppendTranscript(ev.results[i][0].transcript.trim());
+    }
+  };
+  rec.onerror=()=>{};
+  rec.onend=()=>{if(ntState.recording){try{rec.start();}catch(e){}}};
+  rec.start();
+  ntState.recognition=rec;
+}
+function ntAppendTranscript(text){
+  ntState.transcript+=(ntState.transcript?' ':'')+text;
+  const el=document.getElementById('ntTranscript');
+  el.textContent=ntState.transcript;
+  el.scrollTop=el.scrollHeight;
+}
+
+// ── SUMMARIZER ────────────────────────────────────────────────────
+async function ntFinishAndSummarize(){
+  const cfg=ntGetSettings();
+  const transcript=ntState.transcript.trim()||'(Sin audio transcrito en esta sesión)';
+  document.getElementById('ntResultsCard').classList.remove('hidden');
+  document.getElementById('nt-panel-resumen').innerHTML='<div class="nt-status">Generando resumen...</div>';
+  document.getElementById('ntResultsCard').scrollIntoView({behavior:'smooth'});
+  try{
+    const raw=cfg.sumMode==='ollama'?await ntCallOllama(transcript):await ntCallClaude(transcript);
+    const json=ntParseJSON(raw);
+    ntState.lastResult=json;
+    ntRenderResults(json);
+    document.getElementById('ntRecStatus').textContent='Minuta generada ✓';
+  }catch(e){
+    document.getElementById('nt-panel-resumen').innerHTML=`<div style="color:var(--urgent);">❌ Error generando resumen: ${e.message}</div>`;
+    document.getElementById('ntRecStatus').textContent='Error al generar minuta';
+  }
+}
+async function ntCallClaude(transcript){
+  const key=localStorage.getItem('anthropic_api_key');
+  if(!key)throw new Error('Configura tu Anthropic API Key (botón "API Key" del header)');
+  const r=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,system:NT_SCHEMA_PROMPT,messages:[{role:'user',content:`TRANSCRIPCIÓN:\n${transcript}`}]})
+  });
+  if(!r.ok){const e=await r.json();throw new Error(e.error?.message||'Error API Claude');}
+  const d=await r.json();
+  return d.content[0]?.text||'';
+}
+async function ntCallOllama(transcript){
+  let r;
+  try{
+    r=await fetch('http://localhost:11434/api/generate',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'llama3.1:8b',prompt:`${NT_SCHEMA_PROMPT}\n\nTRANSCRIPCIÓN:\n${transcript}`,stream:false,format:'json'})
+    });
+  }catch(e){throw new Error('No se pudo conectar con Ollama local en http://localhost:11434. Verifica que esté corriendo (ollama serve).');}
+  if(!r.ok)throw new Error('Ollama respondió con error HTTP '+r.status);
+  const d=await r.json();
+  return d.response||'';
+}
+function ntParseJSON(raw){
+  let s=raw.trim().replace(/```json|```/g,'').trim();
+  const start=s.indexOf('{'),end=s.lastIndexOf('}');
+  if(start>=0&&end>start)s=s.slice(start,end+1);
+  return JSON.parse(s);
+}
+
+// ── RESULTS / TASKS ───────────────────────────────────────────────
+function ntRenderResults(j){
+  document.getElementById('nt-panel-resumen').innerHTML=`<h3 style="margin-bottom:6px;color:var(--p295);">${j.titulo||'Reunión'}</h3><p>${(j.resumen||'Sin resumen.').replace(/\n/g,'<br>')}</p>`;
+  document.getElementById('nt-panel-transcripcion').innerHTML=`<div class="nt-transcript" style="max-height:none;">${(j.transcripcion||'Sin transcripción.').replace(/\n/g,'<br>')}</div>`;
+  document.getElementById('nt-panel-action').innerHTML=(j.action_items&&j.action_items.length)?
+    j.action_items.map(a=>`<div class="nt-ai-item"><span class="nt-ai-task">${a.tarea}</span><span class="nt-ai-meta">${a.responsable||'sin asignar'} · ${a.fecha_limite||'sin fecha'} · ${(a.prioridad||'').toUpperCase()}</span></div>`).join(''):
+    '<div class="nt-status">Sin action items detectados.</div>';
+  document.getElementById('nt-panel-decisiones').innerHTML=(j.decisiones&&j.decisiones.length)?
+    '<ul style="padding-left:16px;">'+j.decisiones.map(d=>`<li>${d}</li>`).join('')+'</ul>':'<div class="nt-status">Sin decisiones registradas.</div>';
+  document.getElementById('nt-panel-participantes').innerHTML=(j.participantes&&j.participantes.length)?
+    '<ul style="padding-left:16px;">'+j.participantes.map(p=>`<li>${p}</li>`).join('')+'</ul>':'<div class="nt-status">Sin participantes detectados.</div>';
+  document.getElementById('ntNotionStatus').textContent='';
+  ntSwitchTab('resumen');
+  ntPushTasksToPendientes(j);
+}
+function ntSwitchTab(tab){
+  const tabs=['resumen','transcripcion','action','decisiones','participantes'];
+  document.querySelectorAll('.nt-tab').forEach((b,i)=>b.classList.toggle('active',tabs[i]===tab));
+  document.querySelectorAll('.nt-tabpanel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('nt-panel-'+tab).classList.add('active');
+}
+function ntPushTasksToPendientes(j){
+  const tasks=JSON.parse(localStorage.getItem('marelli_tasks')||'[]');
+  (j.action_items||[]).forEach(a=>{
+    if(!a.tarea)return;
+    const prio=a.prioridad==='alta'?'urgent':a.prioridad==='media'?'normal':'info';
+    tasks.unshift({
+      id:Date.now()+Math.random(),
+      title:`${a.tarea}${a.fecha_limite?` → ${a.fecha_limite}`:''}`,
+      prio,mine:true,
+      source:'NOTETAKER',sourceType:'meeting',
+      sourceName:j.titulo||'Notetaker en vivo',
+      fecha:new Date().toISOString().split('T')[0],
+      done:false,ts:Date.now()
+    });
+  });
+  const unique=tasks.filter((t,i,a)=>a.findIndex(x=>x.title===t.title&&x.source===t.source&&x.sourceName===t.sourceName)===i);
+  if(unique.length>200)unique.splice(200);
+  localStorage.setItem('marelli_tasks',JSON.stringify(unique));
+  updatePendingBadge();
+}
+
+// ── NOTION SYNC ───────────────────────────────────────────────────
+function ntNotionHeading(t){return{object:'block',type:'heading_2',heading_2:{rich_text:[{type:'text',text:{content:t}}]}};}
+function ntNotionParagraphs(text){
+  if(!text)return[{object:'block',type:'paragraph',paragraph:{rich_text:[]}}];
+  const chunks=text.match(/[\s\S]{1,1900}/g)||[text];
+  return chunks.map(c=>({object:'block',type:'paragraph',paragraph:{rich_text:[{type:'text',text:{content:c}}]}}));
+}
+function ntNotionTodo(t){return{object:'block',type:'to_do',to_do:{rich_text:[{type:'text',text:{content:t}}],checked:false}};}
+function ntNotionBullet(t){return{object:'block',type:'bulleted_list_item',bulleted_list_item:{rich_text:[{type:'text',text:{content:t}}]}};}
+async function ntSyncNotion(){
+  const cfg=ntGetSettings();
+  const j=ntState.lastResult;
+  const status=document.getElementById('ntNotionStatus');
+  if(!j)return;
+  if(!cfg.notionToken||!cfg.notionDb){
+    status.innerHTML='⚠️ Configura tu Notion Integration Token y Database ID en Configuración, o usa "Copiar Markdown".';
+    return;
+  }
+  status.textContent='Enviando a Notion...';
+  const children=[
+    ...[ntNotionHeading('Resumen')],...ntNotionParagraphs(j.resumen),
+    ...[ntNotionHeading('Transcripción')],...ntNotionParagraphs(j.transcripcion),
+    ...[ntNotionHeading('Action Items')],...(j.action_items||[]).map(a=>ntNotionTodo(`${a.tarea} — ${a.responsable||'sin asignar'} (${a.fecha_limite||'sin fecha'}, ${a.prioridad||''})`)),
+    ...[ntNotionHeading('Decisiones')],...(j.decisiones||[]).map(ntNotionBullet),
+    ...[ntNotionHeading('Participantes')],...(j.participantes||[]).map(ntNotionBullet)
+  ];
+  try{
+    const r=await fetch('https://api.notion.com/v1/pages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json',Authorization:`Bearer ${cfg.notionToken}`,'Notion-Version':'2022-06-28'},
+      body:JSON.stringify({
+        parent:{database_id:cfg.notionDb},
+        properties:{title:{title:[{text:{content:j.titulo||'Minuta de reunión'}}]}},
+        children
+      })
+    });
+    if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||('HTTP '+r.status));}
+    status.innerHTML='✅ Página creada en la base "Meeting Notes" de Notion.';
+  }catch(e){
+    status.innerHTML=`⚠️ No se pudo conectar directo a Notion (${e.message}). La API de Notion no permite llamadas desde el navegador (CORS). Usa "Copiar Markdown" y pégalo en tu página de Notion.`;
+  }
+}
+function ntCopyMarkdown(){
+  const j=ntState.lastResult;if(!j)return;
+  const md=`# ${j.titulo||'Minuta de reunión'}\n\n## Resumen\n${j.resumen||''}\n\n## Transcripción\n${j.transcripcion||''}\n\n## Action Items\n${(j.action_items||[]).map(a=>`- [ ] ${a.tarea} — ${a.responsable||'sin asignar'} (${a.fecha_limite||'sin fecha'}, ${a.prioridad||''})`).join('\n')}\n\n## Decisiones\n${(j.decisiones||[]).map(d=>`- ${d}`).join('\n')}\n\n## Participantes\n${(j.participantes||[]).map(p=>`- ${p}`).join('\n')}\n`;
+  navigator.clipboard.writeText(md).then(()=>{
+    document.getElementById('ntNotionStatus').innerHTML='✅ Markdown copiado al portapapeles — pégalo en Notion (Ctrl/Cmd+V).';
+  }).catch(()=>{
+    document.getElementById('ntNotionStatus').innerHTML='⚠️ No se pudo copiar automáticamente. Copia manualmente desde la pestaña "Transcripción".';
+  });
+}
 </script>
 </body>
 </html>
