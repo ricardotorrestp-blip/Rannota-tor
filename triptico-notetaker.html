@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meeting Notetaker — Tríptico de Compatibilidad</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --p295:#002855;--p2925:#009CDE;--grey:#A6BBC8;
+  --light:#f4f7fa;--white:#fff;--border:#dde3ea;
+  --text:#002855;--text2:#3d5a72;--text3:#8fa3b3;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#cbd5df;font-family:'Noto Sans',Arial,sans-serif;color:var(--text);padding:24px;}
+
+/* ── PAGE / PANEL LAYOUT (A4 landscape, 3 panels de 99mm) ── */
+.page{
+  width:297mm;height:210mm;display:flex;background:var(--white);
+  margin:0 auto 24px;box-shadow:0 4px 24px rgba(0,40,85,.18);overflow:hidden;
+}
+.panel{
+  width:99mm;height:210mm;padding:9mm 8mm;display:flex;flex-direction:column;
+  border-right:1px dashed var(--border);position:relative;
+}
+.panel:last-child{border-right:none;}
+.page-label{
+  position:absolute;bottom:4mm;right:6mm;font-size:6.5pt;color:var(--text3);
+  letter-spacing:.5px;text-transform:uppercase;font-weight:600;
+}
+
+/* ── TYPO ── */
+h1,h2,h3{font-family:'Noto Sans',Arial,sans-serif;color:var(--p295);}
+.eyebrow{font-size:7.5pt;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--p2925);margin-bottom:4px;}
+h2{font-size:13pt;font-weight:700;margin-bottom:6mm;padding-bottom:2mm;border-bottom:2px solid var(--p2925);}
+h3{font-size:9.5pt;font-weight:700;margin:4mm 0 2mm;display:flex;align-items:center;gap:5px;}
+p,li{font-size:8pt;line-height:1.55;color:var(--text2);font-weight:300;}
+strong{color:var(--p295);font-weight:600;}
+ul,ol{padding-left:4mm;margin-bottom:3mm;}
+li{margin-bottom:1.5mm;}
+code{background:var(--light);border:1px solid var(--border);border-radius:3px;padding:1px 4px;font-size:7.5pt;font-family:'SF Mono',Consolas,monospace;color:var(--p295);}
+
+/* ── COVER (PANEL 2) ── */
+.cover{background:var(--p295);color:#fff;justify-content:center;align-items:center;text-align:center;position:relative;}
+.cover .accent-top{position:absolute;top:0;left:0;right:0;height:6px;background:var(--p2925);}
+.cover-brand{font-size:9pt;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--grey);margin-bottom:14mm;}
+.cover-icon{font-size:44pt;margin-bottom:6mm;}
+.cover h1{color:#fff;font-size:22pt;font-weight:700;line-height:1.25;margin-bottom:5mm;}
+.cover .sub{font-size:10pt;color:var(--grey);font-weight:300;margin-bottom:10mm;line-height:1.6;}
+.cover .tagline{font-size:8.5pt;color:#fff;font-weight:600;background:rgba(0,156,222,.18);border:1px solid rgba(0,156,222,.4);border-radius:20px;padding:6px 14px;display:inline-block;margin-bottom:12mm;}
+.badges{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;}
+.badge{font-size:7pt;font-weight:600;color:var(--p295);background:#fff;border-radius:12px;padding:3px 9px;}
+.cover-foot{position:absolute;bottom:9mm;left:0;right:0;font-size:7pt;color:var(--grey);font-weight:300;}
+
+/* ── BENEFIT LIST (PANEL 3) ── */
+.benefit{display:flex;gap:6px;align-items:flex-start;margin-bottom:4mm;}
+.benefit .ic{font-size:14pt;line-height:1;flex-shrink:0;width:8mm;text-align:center;}
+.benefit .tx b{display:block;color:var(--p295);font-size:8.5pt;font-weight:700;margin-bottom:.5mm;}
+.benefit .tx p{margin:0;}
+.steps3{background:var(--light);border:1px solid var(--border);border-radius:6px;padding:5mm;margin-top:auto;}
+.steps3 h3{margin-top:0;}
+.step{display:flex;gap:5px;align-items:flex-start;margin-bottom:2mm;}
+.step .n{flex-shrink:0;width:5mm;height:5mm;border-radius:50%;background:var(--p2925);color:#fff;font-size:7.5pt;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.step p{margin:0;padding-top:.3mm;}
+
+/* ── COMPAT MATRIX (PANEL 1 = back cover) ── */
+.matrix-row{border:1px solid var(--border);border-radius:6px;padding:3mm 3.5mm;margin-bottom:2.5mm;background:var(--light);}
+.matrix-row .mr-head{display:flex;align-items:center;gap:5px;margin-bottom:1mm;}
+.matrix-row .mr-head .ic{font-size:11pt;}
+.matrix-row .mr-head b{font-size:8.5pt;color:var(--p295);}
+.matrix-row .mr-tags{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:1mm;}
+.tag{font-size:6.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.4px;background:rgba(0,156,222,.1);color:var(--p295);border:1px solid rgba(0,156,222,.25);border-radius:8px;padding:1.5px 6px;}
+.matrix-row .mr-req{font-size:7pt;color:var(--text3);font-weight:300;}
+.back-foot{margin-top:auto;background:var(--p295);color:#fff;border-radius:6px;padding:4mm;text-align:center;}
+.back-foot b{color:#fff;font-size:8.5pt;}
+.back-foot p{color:var(--grey);margin-top:1mm;}
+
+/* ── INSTRUCTION PANELS (4,5,6) ── */
+.section-block{background:var(--light);border:1px solid var(--border);border-left:3px solid var(--p2925);border-radius:6px;padding:4mm 4mm;margin-bottom:4mm;}
+.section-block h3{margin-top:0;}
+.shortcut-table{width:100%;border-collapse:collapse;margin:2mm 0 3mm;}
+.shortcut-table td{font-size:7.5pt;padding:1.5mm 0;border-bottom:1px solid var(--border);color:var(--text2);}
+.shortcut-table td:first-child{white-space:nowrap;padding-right:3mm;}
+.kbd{font-family:'SF Mono',Consolas,monospace;font-size:7.5pt;background:var(--p295);color:#fff;border-radius:3px;padding:1.5px 5px;}
+.tip{font-size:7.5pt;font-style:italic;color:var(--p2925);font-weight:600;margin-top:auto;background:rgba(0,156,222,.07);border-radius:6px;padding:3mm;}
+
+@media print{
+  body{background:#fff;padding:0;}
+  .page{box-shadow:none;margin:0;page-break-after:always;}
+  .page:last-child{page-break-after:auto;}
+}
+@media screen and (max-width:900px){
+  .page{width:100%;height:auto;flex-direction:column;transform:none;}
+  .panel{width:100%;height:auto;border-right:none;border-bottom:1px dashed var(--border);min-height:400px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════ PÁGINA 1 — EXTERIOR (portada · contraportada · solapa) ════════════ -->
+<div class="page">
+
+  <!-- PANEL 1 — CONTRAPORTADA: Compatibilidad a un vistazo -->
+  <div class="panel">
+    <div class="eyebrow">Compatibilidad</div>
+    <h2>Todo lo que ya usas, conectado</h2>
+
+    <div class="matrix-row">
+      <div class="mr-head"><span class="ic">📅</span><b>Calendario</b></div>
+      <div class="mr-tags"><span class="tag">Google Calendar</span></div>
+      <div class="mr-req">Requiere: Client ID OAuth (gratuito, vía Google Cloud Console)</div>
+    </div>
+
+    <div class="matrix-row">
+      <div class="mr-head"><span class="ic">🎙️</span><b>Captura de audio</b></div>
+      <div class="mr-tags"><span class="tag">Chrome</span><span class="tag">Edge</span><span class="tag">Zoom</span><span class="tag">Meet</span><span class="tag">Teams</span><span class="tag">Webex</span></div>
+      <div class="mr-req">Windows: audio del sistema · macOS: audio de pestaña Chrome</div>
+    </div>
+
+    <div class="matrix-row">
+      <div class="mr-head"><span class="ic">📝</span><b>Transcripción</b></div>
+      <div class="mr-tags"><span class="tag">OpenAI Whisper API</span><span class="tag">Web Speech API</span></div>
+      <div class="mr-req">Whisper: requiere API key · Web Speech: integrado en Chrome, gratis</div>
+    </div>
+
+    <div class="matrix-row">
+      <div class="mr-head"><span class="ic">🤖</span><b>Resumen / Minuta</b></div>
+      <div class="mr-tags"><span class="tag">Claude API</span><span class="tag">Ollama local</span></div>
+      <div class="mr-req">Claude: misma key del header · Ollama: 100% local, sin internet</div>
+    </div>
+
+    <div class="matrix-row">
+      <div class="mr-head"><span class="ic">⇪</span><b>Sincronización</b></div>
+      <div class="mr-tags"><span class="tag">Notion API</span><span class="tag">Markdown</span></div>
+      <div class="mr-req">Notion: integration token + Database ID · respaldo: copiar Markdown</div>
+    </div>
+
+    <div class="matrix-row">
+      <div class="mr-head"><span class="ic">⌨️</span><b>Control físico</b></div>
+      <div class="mr-tags"><span class="tag">Logitech Creative Console</span><span class="tag">Loupedeck</span><span class="tag">Stream Deck</span></div>
+      <div class="mr-req">Vía atajos de teclado o "Abrir sitio web" — sin plugins</div>
+    </div>
+
+    <div class="back-foot">
+      <b>🎙️ Meeting Notetaker</b>
+      <p>Beta · 100% navegador · Guía completa en el README de Rannota-tor</p>
+    </div>
+    <div class="page-label">Página 1 · Exterior</div>
+  </div>
+
+  <!-- PANEL 2 — PORTADA -->
+  <div class="panel cover">
+    <div class="accent-top"></div>
+    <div class="cover-brand">Marelli · Rannota-tor</div>
+    <div class="cover-icon">🎙️</div>
+    <h1>Meeting Notetaker</h1>
+    <div class="sub">Tu copiloto de reuniones, directo en el navegador.<br>Sin instalar nada en tu equipo.</div>
+    <div class="tagline">✓ Compatible con tu flujo de trabajo actual</div>
+    <div class="badges">
+      <span class="badge">📅 Google Calendar</span>
+      <span class="badge">🎥 Zoom / Meet / Teams / Webex</span>
+      <span class="badge">🗣️ Whisper API</span>
+      <span class="badge">🤖 Claude / Ollama</span>
+      <span class="badge">📝 Notion</span>
+      <span class="badge">⌨️ Creative Console / Stream Deck</span>
+    </div>
+    <div class="cover-foot">Detecta · Transcribe · Resume · Sincroniza · Controla</div>
+  </div>
+
+  <!-- PANEL 3 — ¿POR QUÉ? + 3 PASOS -->
+  <div class="panel">
+    <div class="eyebrow">Beneficios</div>
+    <h2>¿Por qué Meeting Notetaker?</h2>
+
+    <div class="benefit">
+      <div class="ic">🔔</div>
+      <div class="tx"><b>Detección automática</b><p>Compara tu Google Calendar contra la hora actual y te avisa cuando una junta con link de videollamada está en curso — incluso si se traslapan varias.</p></div>
+    </div>
+    <div class="benefit">
+      <div class="ic">🎙️</div>
+      <div class="tx"><b>Transcripción en vivo</b><p>Captura el audio de tu pestaña/sistema en chunks de 5 segundos y los transcribe en tiempo real, sin salir del navegador.</p></div>
+    </div>
+    <div class="benefit">
+      <div class="ic">📄</div>
+      <div class="tx"><b>Minutas estructuradas</b><p>Genera automáticamente Resumen, Transcripción, Decisiones, Action Items y Participantes en un formato listo para compartir.</p></div>
+    </div>
+    <div class="benefit">
+      <div class="ic">🗂</div>
+      <div class="tx"><b>Pendientes accionables</b><p>Cada action item detectado se agrega solo al panel de Pendientes, con prioridad y responsable.</p></div>
+    </div>
+    <div class="benefit">
+      <div class="ic">📝</div>
+      <div class="tx"><b>Notion en un clic</b><p>Envía la minuta directo a tu base "Meeting Notes" de Notion, o copia el Markdown si prefieres pegarlo a mano.</p></div>
+    </div>
+
+    <div class="steps3">
+      <h3>🚀 Empieza en 3 pasos</h3>
+      <div class="step"><div class="n">1</div><p>Haz clic en <strong>🎙️ Notetaker</strong> en el header.</p></div>
+      <div class="step"><div class="n">2</div><p>Configura tus claves en <strong>⚙️ Configuración</strong> (opcional, todo queda en tu navegador).</p></div>
+      <div class="step"><div class="n">3</div><p>Pulsa <strong>▶ Iniciar captura</strong> y deja que Notetaker trabaje por ti.</p></div>
+    </div>
+    <div class="page-label">Página 1 · Exterior</div>
+  </div>
+
+</div>
+
+<!-- ════════════ PÁGINA 2 — INTERIOR (configuración paso a paso) ════════════ -->
+<div class="page">
+
+  <!-- PANEL 4 — CALENDARIO + CAPTURA -->
+  <div class="panel">
+    <div class="eyebrow">Configuración · Paso 1-2</div>
+    <h2>Calendario y captura de audio</h2>
+
+    <div class="section-block">
+      <h3>📅 Google Calendar</h3>
+      <ol>
+        <li>Entra a <strong>console.cloud.google.com</strong> y crea un proyecto.</li>
+        <li>Habilita la <strong>Google Calendar API</strong>.</li>
+        <li>Crea una credencial <strong>OAuth 2.0 → Aplicación web</strong>.</li>
+        <li>Agrega la URL donde abres Rannota-tor en "Orígenes de JavaScript autorizados".</li>
+        <li>Copia el <strong>Client ID</strong>.</li>
+        <li>En Notetaker → ⚙️ Configuración, pégalo en "Google Client ID".</li>
+        <li>Pulsa <strong>"Conectar Google Calendar"</strong> y autoriza el acceso de solo lectura.</li>
+      </ol>
+    </div>
+
+    <div class="section-block">
+      <h3>🎙️ Captura de audio</h3>
+      <p>Al pulsar <strong>▶ Iniciar captura</strong>, el navegador te pedirá elegir qué compartir:</p>
+      <ul>
+        <li><strong>Windows</strong>: comparte "Pantalla completa" o una ventana, y activa <strong>"Compartir audio del sistema"</strong>.</li>
+        <li><strong>macOS</strong>: comparte una <strong>pestaña de Chrome</strong> con tu reunión, y activa <strong>"Compartir audio de la pestaña"</strong>.</li>
+      </ul>
+      <p>El audio se divide en chunks de <strong>5 segundos</strong> y se transcribe automáticamente — no necesitas bocinas activas, es audio del sistema, no del aire.</p>
+    </div>
+    <div class="page-label">Página 2 · Interior</div>
+  </div>
+
+  <!-- PANEL 5 — TRANSCRIPCIÓN/RESUMEN + NOTION -->
+  <div class="panel">
+    <div class="eyebrow">Configuración · Paso 3-4</div>
+    <h2>Transcripción, resumen y Notion</h2>
+
+    <div class="section-block">
+      <h3>🤖 Transcripción y resumen</h3>
+      <p><strong>Transcripción</strong> — elige en ⚙️ Configuración:</p>
+      <ul>
+        <li><strong>OpenAI Whisper API</strong> (recomendado): pega tu API key de OpenAI.</li>
+        <li><strong>Web Speech API</strong>: gratis, usa el micrófono del equipo (Chrome).</li>
+      </ul>
+      <p><strong>Resumen (Summarizer)</strong> — elige:</p>
+      <ul>
+        <li><strong>Claude API</strong>: usa la misma API Key del header.</li>
+        <li><strong>Ollama local</strong> (<code>llama3.1:8b</code>): 100% privado, requiere <code>ollama serve</code> corriendo en <code>localhost:11434</code>.</li>
+      </ul>
+    </div>
+
+    <div class="section-block">
+      <h3>📝 Sincronización con Notion</h3>
+      <ol>
+        <li>Ve a <strong>notion.so/my-integrations</strong> → "Nueva integración" → copia el token.</li>
+        <li>Crea una base de datos llamada <strong>"Meeting Notes"</strong>.</li>
+        <li>En "···" de la base → <strong>Conexiones</strong> → agrega tu integración.</li>
+        <li>Copia el <strong>Database ID</strong> de la URL de la base.</li>
+        <li>Pega token + Database ID en ⚙️ Configuración del Notetaker.</li>
+        <li>Tras generar la minuta, pulsa <strong>"⇪ Enviar a Notion"</strong>.</li>
+      </ol>
+      <p>¿Sin token configurado o bloqueo por CORS? Usa <strong>"⧉ Copiar Markdown"</strong> y pégalo directo en tu página de Notion.</p>
+    </div>
+    <div class="page-label">Página 2 · Interior</div>
+  </div>
+
+  <!-- PANEL 6 — CONTROL SURFACES -->
+  <div class="panel">
+    <div class="eyebrow">Configuración · Paso 5</div>
+    <h2>Control desde tu Creative Console</h2>
+
+    <div class="section-block">
+      <h3>⌨️ Atajos de teclado globales</h3>
+      <p>Asigna estos combos a un botón o dial de tu <strong>Logitech/Loupedeck Creative Console</strong>, <strong>Elgato Stream Deck</strong>, o cualquier software de macros (acción tipo "Acceso directo de teclado"):</p>
+      <table class="shortcut-table">
+        <tr><td><span class="kbd">Alt+Shift+N</span></td><td>Abrir / cerrar el Notetaker</td></tr>
+        <tr><td><span class="kbd">Alt+Shift+C</span></td><td>Iniciar / detener captura</td></tr>
+        <tr><td><span class="kbd">Alt+Shift+P</span></td><td>Abrir / cerrar Pendientes</td></tr>
+      </table>
+    </div>
+
+    <div class="section-block">
+      <h3>🌐 Alternativa: "Abrir sitio web"</h3>
+      <p>Si tu dispositivo solo permite abrir URLs, configura un botón hacia:</p>
+      <ul>
+        <li><code>index.html?nt=open</code> — abre el panel del Notetaker.</li>
+        <li><code>index.html?nt=capture</code> — abre el panel <strong>e inicia la captura</strong> directamente.</li>
+      </ul>
+    </div>
+
+    <div class="section-block">
+      <h3>🛠️ Logitech Creative Console — paso a paso</h3>
+      <ol>
+        <li>Abre <strong>Logi Options+</strong> (o la app Loupedeck).</li>
+        <li>Selecciona tu Creative Console y un botón/dial libre.</li>
+        <li>Arrastra la acción <strong>"Acceso directo de teclado"</strong> al botón.</li>
+        <li>Captura la combinación (ej. <span class="kbd">Alt+Shift+C</span>) y guarda.</li>
+        <li>Etiqueta el botón como <strong>🎙️ Notetaker</strong>.</li>
+      </ol>
+    </div>
+
+    <div class="tip">💡 Tip: deja un botón listo con "🎙️" antes de cada llamada — un toque y Notetaker empieza a escuchar.</div>
+    <div class="page-label">Página 2 · Interior</div>
+  </div>
+
+</div>
+
+</body>
+</html>
