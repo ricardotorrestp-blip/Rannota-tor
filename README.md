@@ -25,3 +25,14 @@ del navegador, igual que la API Key de Anthropic.
 
 Los "Action Items" detectados se agregan automáticamente al panel de
 **🗂 Pendientes** existente.
+
+### Integración con control surfaces (Logitech / Loupedeck Creative Console, Stream Deck, etc.)
+
+No hay SDK nativo, pero puedes mapear botones/dial a:
+
+- **Acción de teclado** → atajos globales de la página:
+  - `Alt+Shift+N` — abrir/cerrar el Notetaker
+  - `Alt+Shift+C` — iniciar/detener captura (abre el panel automáticamente si está cerrado)
+  - `Alt+Shift+P` — abrir/cerrar Pendientes
+- **Acción "Abrir sitio web"** → `index.html?nt=open` (abre el Notetaker) o
+  `index.html?nt=capture` (abre el Notetaker e inicia la captura directamente).

@@ -403,6 +403,7 @@ textarea::placeholder{color:var(--text3);font-weight:300;}
         </div>
         <div class="nt-btnrow"><button class="nt-btn" onclick="ntSaveSettings()">Guardar configuración</button><span class="nt-status" id="ntSettingsStatus"></span></div>
         <div class="nt-help">Todo se guarda solo en este navegador (localStorage), igual que tu API Key de Anthropic. Nada se envía a servidores de Marelli/Rannota-tor.</div>
+        <div class="nt-help">⌨️ <strong>Atajos de teclado</strong> (útiles para mapear botones de un control surface como Logitech/Loupedeck Creative Console como "Acción de teclado"): <code>Alt+Shift+N</code> abrir/cerrar Notetaker · <code>Alt+Shift+C</code> iniciar/detener captura · <code>Alt+Shift+P</code> abrir/cerrar Pendientes. También puedes configurar un botón como "Abrir sitio web" hacia <code>?nt=open</code> o <code>?nt=capture</code>.</div>
       </div>
 
       <!-- RESULTADOS -->
@@ -708,6 +709,14 @@ window.onload=()=>{
     if(params.get('who'))document.getElementById('callWho').value=decodeURIComponent(params.get('who'));
     if(params.get('title'))document.getElementById('callTitle').value=decodeURIComponent(params.get('title'));
   }
+  // ?nt=open o ?nt=capture — para botones de Logitech/Loupedeck Creative Console
+  // configurados como "Abrir sitio web" con esta URL.
+  const ntParam=params.get('nt');
+  if(ntParam==='open'||ntParam==='capture'){
+    openNotetaker();
+    if(ntParam==='capture')ntStartCapture();
+  }
+  ntInitShortcuts();
   checkKey();loadHist();updatePendingBadge();
   window.addEventListener('resize',()=>{if(mmData)drawMM();});
   setInterval(ntCheckActiveMeeting,60000);
@@ -1242,6 +1251,29 @@ function openNotetaker(){
   ntCheckActiveMeeting();
 }
 function closeNotetaker(){document.getElementById('ntOverlay').classList.add('hidden');}
+
+// ── ATAJOS DE TECLADO (control surfaces como Logitech/Loupedeck Creative
+// Console: asigna estos combos a sus botones/dial vía "Acción de teclado") ──
+function ntInitShortcuts(){
+  document.addEventListener('keydown',(e)=>{
+    if(!e.altKey||!e.shiftKey)return;
+    switch(e.code){
+      case 'KeyN': // Alt+Shift+N → abrir/cerrar Notetaker
+        e.preventDefault();
+        document.getElementById('ntOverlay').classList.contains('hidden')?openNotetaker():closeNotetaker();
+        break;
+      case 'KeyC': // Alt+Shift+C → iniciar/detener captura (abre el panel si está cerrado)
+        e.preventDefault();
+        if(document.getElementById('ntOverlay').classList.contains('hidden'))openNotetaker();
+        ntState.recording?ntStopCapture():ntStartCapture();
+        break;
+      case 'KeyP': // Alt+Shift+P → abrir/cerrar Pendientes
+        e.preventDefault();
+        document.getElementById('pendientesOverlay').classList.contains('hidden')?openPendientes():closePendientes();
+        break;
+    }
+  });
+}
 
 // ── CALENDAR SYNC (Google Calendar) ───────────────────────────────
 function ntLoadGIS(cb){
