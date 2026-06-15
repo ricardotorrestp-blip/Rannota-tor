@@ -30,9 +30,14 @@ Los "Action Items" detectados se agregan automáticamente al panel de
 
 No hay SDK nativo, pero puedes mapear botones/dial a:
 
-- **Acción de teclado** → atajos globales de la página:
+- **Acción "Abrir sitio web" (recomendado)** → no depende de atajos de teclado, así
+  que no choca con combinaciones del sistema (p. ej. split view). Primero ejecuta
+  `iniciar-servidor.command` (macOS/Linux) o `iniciar-servidor.bat` (Windows) — deja
+  la ventana abierta — y luego usa estas URLs en los botones:
+  - **Notetaker**: `http://localhost:5500/index.html?nt=open`
+  - **Iniciar captura**: `http://localhost:5500/index.html?nt=capture`
+- **Acción de teclado** → atajos globales de la página (pueden chocar con atajos del
+  sistema operativo o del navegador en algunos equipos):
   - `Alt+Shift+N` — abrir/cerrar el Notetaker
   - `Alt+Shift+C` — iniciar/detener captura (abre el panel automáticamente si está cerrado)
   - `Alt+Shift+P` — abrir/cerrar Pendientes
-- **Acción "Abrir sitio web"** → `index.html?nt=open` (abre el Notetaker) o
-  `index.html?nt=capture` (abre el Notetaker e inicia la captura directamente).
